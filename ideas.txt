@@ -1,0 +1,59 @@
+--> Cada avatar de user nas listas do feed deve ter uma cor
+--> Mudar icones do sidebar e do botao de like das listas
+--> Pensar em esquema de cores para o site e para as listas
+
+--> Onde inserir barra de busca por novos usuários ?
+--> Search bar dentro a SideBar
+
+--> Página de criar listas
+--> Página perfil do usuário com botão para seguir
+--> Página de minhas listas (talvez não mostrar as listas abertas nessa página, só se clicar)
+--> Editar e deletar lista
+--> Página de Register e Login
+
+--> Remover acordion comlimite de caracters
+--> quantidade de likes
+
+
+
+
+https://www.youtube.com/watch?v=fzxEECHnsvU
+https://mui.com/material-ui/
+
+old card 
+
+<Card sx={{ display: "flex", mb: 2 }}>
+						<Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+							<CardContent sx={{ flex: "1 0 auto" }}>
+								<Typography component="div" variant="h5">
+									Live From Space
+								</Typography>
+								<Typography variant="subtitle1" color="text.secondary" component="div">
+									Mac Miller
+								</Typography>
+								<Typography component="div">
+									Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse
+									platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac
+									eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat.
+									Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor
+								</Typography>
+							</CardContent>
+							{/* <Accordion>
+								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+									<Typography variant="h6">#9 Item 9</Typography>
+								</AccordionSummary>
+								<AccordionDetails>
+									<Typography>
+										Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet
+										blandit leo lobortis eget.
+									</Typography>
+								</AccordionDetails>
+							</Accordion> */}
+						</Box>
+						<CardMedia
+							component="img"
+							sx={{ width: 151, flex: 1 }}
+							image="src\assets\rocky.jpg"
+							alt="Live from space album cover"
+						/>
+					</Card>
