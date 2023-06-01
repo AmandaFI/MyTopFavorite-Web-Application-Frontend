@@ -7,14 +7,14 @@ import CreateListArea from "./components/CreateListArea";
 import EditList from "./components/EditList";
 import { loggedUserType } from "./services/api";
 import Navbar from "./components/Navbar";
-import Sidebar from "./components/sidebar";
+import Sidebar from "./components/Sidebar";
 import { Box, Stack } from "@mui/material";
 import Feed from "./components/Feed";
 import ManageLists from "./components/ManageLists";
 
 export const USER = {
-	name: "Amanda FI",
-	email: "amanda@ia5",
+	name: "Teste",
+	email: "teste@teste",
 	nLIst: 11,
 	follows: 100,
 	followers: 50,

@@ -1,4 +1,4 @@
-// import axios from "axios";
+import axios from "axios";
 
 const api_key = "477772a0b3b472817057ba0d4e4daacd";
 
@@ -27,7 +27,7 @@ type responseType = {
 	total_results: number;
 };
 
-export const searchMovieByTitle = (title: string) => true;
-// axios.get<responseType>(
-// 	`https://api.themoviedb.org/3/search/movie?api_key=${api_key}&language=en-US&query=${title}&page=1&include_adult=false`
-// );
+export const searchMovieByTitle = (title: string) =>
+axios.get<responseType>(
+	`https://api.themoviedb.org/3/search/movie?api_key=${api_key}&language=en-US&query=${title}&page=1&include_adult=false`
+);

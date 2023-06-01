@@ -12,7 +12,7 @@ import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 import { useState } from "react";
-import { authenticationType, loggedUserType, login } from "../services/api";
+import { authenticationType, axiosInstance, loggedUserType, login } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 type signInProps = {
@@ -38,8 +38,17 @@ export default function SignIn(props: signInProps) {
 
 	const authenticateUser = (credentials: authenticationType) => {
 		login(credentials)
-			.then((response) => props.setLoggedUser(response.data))
+			.then((response) =>{
+				console.log('Login')
+				// const cookie = response.headers["Set-Cookie"]![0];
+				const cookie = response.headers["Set-Cookie"];
+				console.log('Cookie:')
+				console.log(cookie)
+  			// axiosInstance.defaults.headers.Cookie = cookie;
+				props.setLoggedUser(response.data)
+			})
 			.catch((error) => {
+				console.log('Erro')
 				if (error.response.status === 404) {
 					window.alert("E-mail ou senha incorretos.");
 				}

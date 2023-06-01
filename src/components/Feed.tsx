@@ -81,11 +81,11 @@ const Icons = styled(Box)(() => ({
 const Something = () => {
 	const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
 
-	// useEffect(() => {
-	// 	loadFeed()
-	// 		.then((response) => setFeedContent(response.data))
-	// 		.catch((error) => console.log(error));
-	// }, []);
+	useEffect(() => {
+		loadFeed()
+			.then((response) => setFeedContent(response.data))
+			.catch((error) => console.log(error));
+	}, []);
 
 	return (
 		<Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>

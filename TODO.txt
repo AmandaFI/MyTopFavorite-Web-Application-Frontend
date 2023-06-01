@@ -1,30 +1,23 @@
-- Pagina de outro usuario com botão seguir
 - clicar no Card do feed e ler mais informações sobre o Item
 - botão ver mais carrega o restante da lista
-- alinhar botoes da area minhas listas
 - ao clicar na lista expandir em outra página
-- postar != salvar ? possibiliar ter listas não postadas ?
 - na barra de busca de usuario arrumar local para exibir resultados
 
 
 URGENTE
--- exibir o resultado da api em formato de tabela, talvez usar avatar para exibir psoter na tabela
-
-
+-- exibir o resultado da api em formato de tabela, talvez usar avatar para exibir poster na tabela
 
 NEXT
 -- estilizar botoes
 -- alterar a barra de busca de usuarios
 -- logica para mostrar a lista toda
--- pagina do outro usuariocom o botao seguir
--- botoes remover e editar da user area estao desalinhados
--- colcoar botoes de salvar e cancelar do lado direito na hora de editar lista
--- mostar os resultados da api em uma tabela e nao lista
+-- pagina do outro usuario com o botao seguir
+-- botoes remover e editar da user area estão desalinhados
+-- colocar botoes de salvar e cancelar do lado direito na hora de editar lista
 -- ao remover um item da lista na edicao, ajeitar a numeracao dos demais itens
 -- colocar icones em alguns botoes ao inves de texto 
 -- ajeitar numeracao do ranking apos remocao e drag and drop
 
--- drag and drop para editar ordem dos itens na lista (talvez na criaçaõ também )
--- perguntar do react strict mode
+-- drag and drop para editar ordem dos itens na lista (talvez na criação também )
 
 -- passar parametros pelo navigate ?

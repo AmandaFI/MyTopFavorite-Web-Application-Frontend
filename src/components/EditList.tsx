@@ -1,6 +1,6 @@
 import { Box, Stack, TextField } from "@mui/material";
 import Navbar from "./Navbar";
-import Sidebar, { SidebarPropsType, sidebarVersionType } from "./sidebar";
+import Sidebar, { sidebarVersionType } from "./Sidebar";
 import { useLocation } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -71,7 +71,6 @@ const EditList = () => {
 	const [tmdbApiResults, setTmdbApiResults] = useState<responseResultType[]>([]);
 
 	const sidebarVersion: sidebarVersionType = "userInfo";
-	const sideBarProps: SidebarPropsType = { sidebarVersion };
 
 	const location = useLocation();
 	const [listId, setListId] = useState<number | null>(null);
