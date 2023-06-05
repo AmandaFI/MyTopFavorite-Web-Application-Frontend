@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 import * as React from "react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Stack } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -14,7 +14,8 @@ import theme from "../theme";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { USER } from "../App";
+import { NewListContext, UserContext } from "../App";
+import { categoryType, deleteList, listType, userLists, allCategories, createList } from "../services/api";
 
 const style = {
 	position: "absolute" as "absolute",
@@ -27,45 +28,113 @@ const style = {
 	p: 4,
 };
 
+export type manageListsProps = {
+	setNewList: React.Dispatch<React.SetStateAction<listType | null>>
+}
+
 type cardType = { itemId: number; category: string; title: string; date: string; apiId: number };
 
-const CARDS = [
-	{ itemId: 1, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 1 },
-	{ itemId: 2, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 2 },
-	{ itemId: 3, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 3 },
-	{ itemId: 4, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 4 },
-	{ itemId: 5, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 5 },
-	{ itemId: 6, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 6 },
-	{ itemId: 7, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 7 },
-	{ itemId: 8, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 8 },
-	{ itemId: 9, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 1 },
-	{ itemId: 10, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 2 },
-	{ itemId: 11, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 3 },
-	{ itemId: 12, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 4 },
-	{ itemId: 13, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 5 },
-	{ itemId: 14, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 6 },
-	{ itemId: 15, category: "Filmes", title: "Top 5 Filmes de Ação", date: "06/05/2023", apiId: 7 },
-	{ itemId: 16, category: "Filmes", title: "Top 10 FIlmes Favoritos", date: "06/05/2023", apiId: 8 },
-];
-
-const ManageLists = () => {
-	const [userLists, setUserLists] = useState(CARDS);
+const ManageLists = (props: manageListsProps) => {
+	const [loggedUserLists, setLoggedUserLists] = useState<Array<listType>>([]);
 	const [openNewListForm, setOpenNewListForm] = useState(false);
-	const listCategories = ["Filmes"];
+	const [categories, setCategories] = useState<Array<categoryType>>([]);
 	const [listTitle, setListTitle] = useState("");
-	const [listCategory, setListCategory] = useState(listCategories[0]);
+	const [listCategory, setListCategory] = useState<categoryType>({id: -1, name: "", });
 
-	const handleListTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setListTitle(e.target.value);
-	};
+	const [createdList, setCreatedList] = useState<listType | null>(null)
 
-	const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setListCategory(e.target.value);
-	};
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		userLists()
+		.then((response) => setLoggedUserLists(response.data))
+		.catch((error) => console.log(error))
+	
+		allCategories()
+		.then((response) => {
+			setCategories(response.data)
+			setListCategory({id: response.data[0]?.id, name: response.data[0]?.name})
+		})
+		.catch((error) => console.log(error))
+		
+	}, []);
+
+	const loggedUser = useContext(UserContext)
 
 	const handleDeleteListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		setUserLists((previousItems) => previousItems.filter((item) => item.itemId !== listId));
+		deleteList(listId).then((_response) => {
+			setLoggedUserLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
+		}).catch((error) => console.log(error))
 	};
+
+	const handleEditListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+	};
+
+	 let userListCards;
+	 if (loggedUserLists !== null) {
+		userListCards = (loggedUserLists.map((card) => (
+		<Card
+			sx={{
+				minWidth: 275,
+				maxWidth: 200,
+				m: 1,
+				minHeight: 250,
+				maxHeight: "50%",
+				display: "flex",
+				flexDirection: "column",
+			}}
+			key={card.id}
+		>
+			<CardContent>
+				<Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+					{card.category.name}
+				</Typography>
+				<Typography variant="h5" component="div">
+					{card.title}
+				</Typography>
+				<Typography sx={{ mb: 1 }} color="text.secondary">
+					{card.created_at.split(":")[0].split("T")[0]}
+				</Typography>
+			</CardContent>
+			<CardActions disableSpacing sx={{ mt: "auto", display: "flex" }}>
+				<Stack direction="row" display="flex" justifyContent="end">
+					<Link
+						to="/edit-list"
+						state={{
+							listId: card.id,
+						}}
+						//verificar se tittle não é null
+						style={{ textDecoration: "none", color: "white" }}
+					>
+						<Button size="small" onClick={handleEditListOnClick(card.id)}>Editar</Button>
+					</Link>
+					<Button size="small" onClick={handleDeleteListOnClick(card.id)}>
+						Deletar
+					</Button>
+				</Stack>
+			</CardActions>
+		</Card>
+	)))}
+	else {
+		userListCards = <></>
+	}
+
+	const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		
+		//fazer reduce para cirar listCAtegories como sendo um  has onde nome é chave e id é valor
+		const category = categories.filter((category) => category.name === e.target.value)
+		setListCategory({id: category[0].id, name: category[0].name});
+	};
+
+	const handleCreateListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		createList(listTitle, listCategory.id)
+		.then((response) => {
+			props.setNewList(response.data);
+			setOpenNewListForm(false);
+			navigate("/create-list")
+		})
+		.catch((error) => console.log(error))
+	}
 
 	return (
 		<>
@@ -82,7 +151,7 @@ const ManageLists = () => {
 								color: "white",
 							}}
 						>
-							Bem-vindo {USER.name}
+							Bem-vindo {loggedUser!.name}
 						</Typography>
 					</Box>
 					<Box
@@ -94,7 +163,7 @@ const ManageLists = () => {
 							flexWrap: "wrap",
 						}}
 					>
-						<Card sx={{ minWidth: 275, m: 1, maxHeight: "40%" }}>
+						<Card sx={{ minWidth: 275, m: 1, maxHeight: "50%", minHeight: 250, }}>
 							<CardContent sx={{ mb: 6 }}>
 								<IconButton size="large" onClick={(_e) => setOpenNewListForm(true)}>
 									<AddCircleOutlineIcon fontSize="large" sx={{ mr: 1 }} />
@@ -117,39 +186,23 @@ const ManageLists = () => {
 										id="outlined-required"
 										label="Título"
 										value={listTitle}
-										onChange={handleListTitleOnChange}
+										onChange={(e) => setListTitle(e.target.value)}
 									/>
 									<TextField
 										id="outlined-select-currency"
 										select
-										defaultValue={listCategories[0]}
+										defaultValue={categories.length !== 0 ? categories[0].name : ""}
 										required
 										label="Categoria"
-										value={listCategory}
+										value={listCategory.name}
 										onChange={handleListCategoryOnChange}
 									>
-										{listCategories.map((category, index) => (
-											<MenuItem key={index} value={category}>
-												{category}
+										{categories.map((category, index) => (
+											<MenuItem key={index} value={category.name}>
+												{category.name}
 											</MenuItem>
 										))}
 									</TextField>
-									{/* <TextField id="outlined-select-currency" select required label="Quantidade de Itens">
-										{[...Array(8).keys()].map((n, index) => (
-											<MenuItem key={index} value={n + 3}>
-												{n + 3}
-											</MenuItem>
-										))}
-									</TextField> */}
-									<Link
-										to="/createlistarea"
-										state={{
-											listTitle: listTitle,
-											listCategory: listCategory,
-										}}
-										//verificar se tittle não é null
-										style={{ textDecoration: "none", color: "white" }}
-									>
 										<Button
 											sx={{
 												bgcolor: theme.palette.secondary.main,
@@ -157,14 +210,12 @@ const ManageLists = () => {
 												display: "flex",
 											}}
 											disabled={listTitle === ""}
-											onClick={(_e) => {
-												setOpenNewListForm(false);
-											}}
+											onClick={handleCreateListOnClick}
 											fullWidth={true}
 										>
 											Criar
 										</Button>
-									</Link>
+								
 									<Button
 										sx={{
 											bgcolor: theme.palette.secondary.main,
@@ -179,48 +230,7 @@ const ManageLists = () => {
 								</Stack>
 							</Box>
 						</Modal>
-						{userLists.map((card) => (
-							<Card
-								sx={{
-									minWidth: 275,
-									maxWidth: 200,
-									m: 1,
-									maxHeight: "40%",
-									display: "flex",
-									flexDirection: "column",
-								}}
-								key={card.apiId}
-							>
-								<CardContent sx={{ mb: 6 }}>
-									<Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-										{card.category}
-									</Typography>
-									<Typography variant="h5" component="div">
-										{card.title}
-									</Typography>
-									<Typography sx={{ mb: 1.5 }} color="text.secondary">
-										{card.date}
-									</Typography>
-								</CardContent>
-								<CardActions disableSpacing sx={{ mt: "auto" }}>
-									<Stack direction="row" display="flex" justifyContent="end">
-										<Link
-											to="/editlist"
-											state={{
-												listId: card.itemId,
-											}}
-											//verificar se tittle não é null
-											style={{ textDecoration: "none", color: "white" }}
-										>
-											<Button size="small">Editar</Button>
-										</Link>
-										<Button size="small" onClick={handleDeleteListOnClick(card.itemId)}>
-											Deletar
-										</Button>
-									</Stack>
-								</CardActions>
-							</Card>
-						))}
+						{userListCards}
 					</Box>
 				</Stack>
 			</Box>

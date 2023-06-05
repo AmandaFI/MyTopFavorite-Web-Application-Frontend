@@ -1,6 +1,6 @@
-import * as React from "react";
-import { useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { Box, Stack } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { styled } from "@mui/system";
 import { responseResultType, searchMovieByTitle } from "../services/tmdbApi";
@@ -10,10 +10,6 @@ import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemButton from "@mui/material/ListItemButton";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
@@ -22,6 +18,12 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Avatar from "@mui/material/Avatar";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemButton from "@mui/material/ListItemButton";
+import { listType } from "../services/api";
+import { NewListContext } from "../App";
 
 const style = {
 	position: "absolute" as "absolute",
@@ -45,18 +47,27 @@ const Icons = styled(Box)(() => ({
 	justifyContent: "space-between",
 }));
 
-export type CreateListPropsType = {
-	listTitle: string;
-	listCategory: string;
-};
+const CreateListArea = () => {
+	const [listTitle, setListTitle] = useState("");
+	const [listCategory, setListCategory] = useState("");
+	const location = useLocation();
 
-const CreateList: React.FC<CreateListPropsType> = (props) => {
+	const newList = useContext(NewListContext)
+
+	useEffect(() => {
+		setListTitle(newList !== null ? newList.title : "");
+		setListCategory(newList !== null ? newList.category.name : "");
+	}, []);
+
 	const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
 	const [addedItems, setAddedItems] = useState<responseResultType[]>([]);
 	const searchTitle = useRef<HTMLInputElement | null>(null);
 	const [chosenItem, setChosenItem] = useState<responseResultType | boolean>(false);
 	const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
 	const [apiResults, setApiResults] = useState<responseResultType[]>([]);
+
+	const [replaceItemId, setReplaceItemId] = useState<number | null>(null);
+	const [itemInEdit, setItemInEdit] = useState<responseResultType | null>(null);
 
 	// FAZER A FUNÇAÕ DE PROCURAR COM ENTER
 	const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -91,11 +102,54 @@ const CreateList: React.FC<CreateListPropsType> = (props) => {
 	};
 
 	const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		setAddedItems((previousItems) => [
-			...previousItems,
-			{ ...(chosenItem as responseResultType), user_input_text: chosenItemUsertext!.current!.value },
-		]);
+		if (replaceItemId === null) {
+			setAddedItems((previousItems) => [
+				...previousItems,
+				{ ...(chosenItem as responseResultType), user_input_text: chosenItemUsertext!.current!.value },
+			]);
+		} else {
+			setAddedItems((previousItems) =>
+				previousItems.map((item, index) =>
+					index === replaceItemId
+						? { ...(chosenItem as responseResultType), user_input_text: chosenItemUsertext!.current!.value }
+						: item
+				)
+			);
+			setReplaceItemId(null);
+		}
 		setOpenSearchItemModal(false);
+	};
+
+	const handleReplaceItemOnClick = (replaceIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		setReplaceItemId(replaceIndex);
+		setOpenSearchItemModal(true);
+	};
+
+	const handleRemoveItemOnClick =
+		(removedItemIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+			setAddedItems((previousItems) => previousItems.filter((_item, index) => index !== removedItemIndex));
+		};
+
+	const handleEditItemOnClick =
+		(editItem: responseResultType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+			setItemInEdit(editItem);
+		};
+
+	const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setItemInEdit((previousItem) => {
+			return { ...(previousItem as responseResultType), user_input_text: e.target.value };
+		});
+	};
+
+	const handleSaveItemEditedOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		setAddedItems((previousItems) =>
+			previousItems.map((item) => (item.id === itemInEdit!.id ? (itemInEdit as responseResultType) : item))
+		);
+		setItemInEdit(null);
+	};
+
+	const handleCancelEditionOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		setItemInEdit(null);
 	};
 
 	return (
@@ -111,52 +165,131 @@ const CreateList: React.FC<CreateListPropsType> = (props) => {
 										<Typography sx={{ ml: 2, mb: 2 }}>username</Typography>
 									</Box>
 									<Typography variant="h5" m={2}>
-										{props.listTitle}
+										{listTitle}
 									</Typography>
 									<Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
-										{props.listCategory}
+										{listCategory}
 									</Box>
 								</Icons>
 
 								<CardContent>
-									{addedItems.map((item, index) => (
-										<Card sx={{ display: "flex", mb: 2 }}>
-											<Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
-												<CardContent sx={{ flex: "1 0 auto" }}>
-													<Stack direction="row" spacing={2}>
-														<Typography component="div" variant="h3">
-															#{index + 1}
-														</Typography>
-														<Stack direction="column">
-															<Typography component="div" variant="h5">
-																{item.original_title}
-															</Typography>
-															<Typography variant="subtitle1" color="text.secondary" component="div">
-																{item.release_date}
-															</Typography>
-														</Stack>
-													</Stack>
-													<Typography component="div">{item.user_input_text}</Typography>
-												</CardContent>
-											</Box>
-											<CardMedia
-												component="img"
-												sx={{ width: 151, flex: 1 }}
-												// image={item.poster_path}
-												alt="Poster do filme"
-												src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
-											/>
-										</Card>
-									))}
+									{addedItems.map((item, index) => {
+										if (item.id === itemInEdit?.id)
+											return (
+												<Card sx={{ display: "flex", mb: 2 }} key={index}>
+													<Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+														<CardContent sx={{ flex: "1 0 auto" }}>
+															<Stack direction="row" spacing={2}>
+																<Typography component="div" variant="h3">
+																	#{index + 1}
+																</Typography>
+																<Stack direction="column">
+																	<Typography component="div" variant="h5">
+																		{item.original_title}
+																	</Typography>
+																	<Typography variant="subtitle1" color="text.secondary" component="div">
+																		{item.release_date}
+																	</Typography>
+																</Stack>
+															</Stack>
+															<Stack direction="column">
+																<TextField
+																	id="outlined-multiline-static"
+																	multiline
+																	rows={4}
+																	value={itemInEdit!.user_input_text}
+																	onChange={handleUserCommentOnChange}
+																/>
+																<Stack direction="row">
+																	<Button
+																		size="small"
+																		sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+																		onClick={handleSaveItemEditedOnClick}
+																	>
+																		Salvar
+																	</Button>
+																	<Button
+																		size="small"
+																		sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+																		onClick={handleCancelEditionOnClick}
+																	>
+																		Cancelar
+																	</Button>
+																</Stack>
+															</Stack>
+														</CardContent>
+													</Box>
+													<CardMedia
+														component="img"
+														sx={{ width: 151, flex: 1 }}
+														// image={item.poster_path}
+														alt="Poster do filme"
+														src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
+													/>
+												</Card>
+											);
+										else
+											return (
+												<Card sx={{ display: "flex", mb: 2 }} key={index}>
+													<Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+														<CardContent sx={{ flex: "1 0 auto" }}>
+															<Stack direction="row" spacing={2}>
+																<Typography component="div" variant="h3">
+																	#{index + 1}
+																</Typography>
+																<Stack direction="column">
+																	<Typography component="div" variant="h5">
+																		{item.original_title}
+																	</Typography>
+																	<Typography variant="subtitle1" color="text.secondary" component="div">
+																		{item.release_date}
+																	</Typography>
+																</Stack>
+															</Stack>
+															<Typography component="div">{item.user_input_text}</Typography>
+															<Stack direction="row" spacing={1}>
+																<Button
+																	size="small"
+																	sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+																	onClick={handleEditItemOnClick(item)}
+																>
+																	Editar
+																</Button>
+																<Button
+																	size="small"
+																	sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+																	onClick={handleReplaceItemOnClick(index)}
+																>
+																	Substituir
+																</Button>
+																<Button
+																	size="small"
+																	sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+																	onClick={handleRemoveItemOnClick(index)}
+																>
+																	Remover
+																</Button>
+															</Stack>
+														</CardContent>
+													</Box>
+													<CardMedia
+														component="img"
+														sx={{ width: 151, flex: 1 }}
+														// image={item.poster_path}
+														alt="Poster do filme"
+														src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
+													/>
+												</Card>
+											);
+									})}
 								</CardContent>
 							</Card>
-							<Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+							<Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
 								<Button sx={buttonStyle} onClick={(_e) => setOpenSearchItemModal(true)}>
-									Add
+									Adicionar
 								</Button>
-								<Button sx={buttonStyle}>Salvar</Button>
-								<Button sx={buttonStyle}>Postar</Button>
-								<Link to="/userarea" style={{ textDecoration: "none", color: "black" }}>
+								<Button sx={buttonStyle}>Publicar</Button>
+								<Link to="/manage-lists" style={{ textDecoration: "none", color: "black" }}>
 									<Button sx={buttonStyle}>Cancelar</Button>
 								</Link>
 							</Box>
@@ -215,4 +348,4 @@ const CreateList: React.FC<CreateListPropsType> = (props) => {
 	);
 };
 
-export default CreateList;
+export default CreateListArea;

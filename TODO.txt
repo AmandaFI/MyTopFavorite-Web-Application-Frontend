@@ -1,23 +1,31 @@
-- clicar no Card do feed e ler mais informações sobre o Item
-- botão ver mais carrega o restante da lista
-- ao clicar na lista expandir em outra página
-- na barra de busca de usuario arrumar local para exibir resultados
+DESIGN:
+
+-- Estilzar botões
+-- Espaçar e alinahr botões em manage list e create area
+-- Considerar colocar icones em alguns botões
+-- Exibir resultados da busca do tmdb em tabela e não lista
+-- Incluindo o poster do filme na tabela
+-- Melhorar apresentação das informações na sidebar
+-- Alguns botões somem no hover (cor igual a cor de fundo e texto)
 
 
-URGENTE
--- exibir o resultado da api em formato de tabela, talvez usar avatar para exibir poster na tabela
+COMPONENTS 
 
-NEXT
--- estilizar botoes
--- alterar a barra de busca de usuarios
--- logica para mostrar a lista toda
--- pagina do outro usuario com o botao seguir
--- botoes remover e editar da user area estão desalinhados
--- colocar botoes de salvar e cancelar do lado direito na hora de editar lista
--- ao remover um item da lista na edicao, ajeitar a numeracao dos demais itens
--- colocar icones em alguns botoes ao inves de texto 
--- ajeitar numeracao do ranking apos remocao e drag and drop
+-- Página para seguir outro usuário
+-- Caixa de resultados da busca de usuário
 
--- drag and drop para editar ordem dos itens na lista (talvez na criação também )
 
--- passar parametros pelo navigate ?
+FUNCIONALIDADES
+
+-- Exibir somente 3 itens das listas nos feeds e botão ver mais carrega o restante
+-- Ao clicar em um card de uma lista no feed, ser possível ler mais informações sobre o item
+-- Ao clicar no em uma lista, abri-la inteira em outra página
+
+PROBLEMAS ATUAIS
+
+- Refresh na create area perde o titulo e categoria da lista
+- Depois de um like, indicar que a lista já foi liked e mudar o botão para dislike
+- Drag and drop para editar ordem dos itens na lista ( edição e criação ) só funciona com o StrictMode desligado
+- Salvar itens da lista em batches (mexer no rails)
+- Salvar e ediar o metadata dos listItems
+- Corrigir numeração dos itens da lsita durante a edição da mesma

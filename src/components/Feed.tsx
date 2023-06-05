@@ -4,16 +4,13 @@ import { styled } from "@mui/system";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Avatar from "@mui/material/Avatar";
 import theme from "../theme";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
-import { completeListType, loadFeed } from "../services/api";
+import { completeListType, likeList, loadFeed } from "../services/api";
 import { useEffect, useState } from "react";
 
 export type ListMovieType = {
@@ -78,25 +75,31 @@ const Icons = styled(Box)(() => ({
 	justifyContent: "space-between",
 }));
 
-const Something = () => {
+const Feed = () => {
 	const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
 
 	useEffect(() => {
 		loadFeed()
-			.then((response) => setFeedContent(response.data))
+			// shuffle array before setState
+			.then((response) => setFeedContent(response.data.sort((a, b) => 0.5 - Math.random())))
 			.catch((error) => console.log(error));
 	}, []);
+
+	const handleLikeListOnClick = (id: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		likeList(id)
+			.then((_response) => {})
+			.catch((error) => console.log(error))
+	}
 
 	return (
 		<Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
 			{feedContent.map((list) => (
-				<Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }}>
-					{/* <Card sx={{ minWidth: 275, m: 3, bgcolor: theme.palette.secondary.main }}> */}
-
+				<Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id} >
+					
 					<Icons>
 						<Box>
-							<Avatar sx={{ mt: 2, ml: 2 }}>AI</Avatar>
-							<Typography sx={{ ml: 2, mb: 2 }}>username</Typography>
+							<Avatar sx={{ mt: 2, ml: 2 }}>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
+							<Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
 						</Box>
 						<Typography variant="h5" m={2}>
 							{list.title}
@@ -107,28 +110,28 @@ const Something = () => {
 					</Icons>
 
 					<CardContent>
-						{list.items.map((movie) => (
-							<Card sx={{ display: "flex", mb: 2 }} key={movie.id}>
+						{list.items.map((item) => (
+							<Card sx={{ display: "flex", mb: 2 }} key={item.id}>
 								<Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
 									<CardContent sx={{ flex: "1 0 auto" }}>
 										<Stack direction="row" spacing={2}>
 											<Typography component="div" variant="h3">
-												{movie.rank}
+												{item.rank}
 											</Typography>
 											<Stack direction="column">
 												<Typography component="div" variant="h5">
-													{movie.title}
+													{item.title}
 												</Typography>
 												<Typography variant="subtitle1" color="text.secondary" component="div">
-													{movie.metadata[0].x}
+													{item.metadata.x}
 												</Typography>
 											</Stack>
 										</Stack>
-										<Typography component="div">{movie.user_comment}</Typography>
+										<Typography component="div">{item.user_comment}</Typography>
 									</CardContent>
 								</Box>
-								<CardMedia component="img" sx={{ width: 151, flex: 1 }} image={movie.metadata.y} alt={movie.title} />
-								{/* <CardMedia component="img" sx={{ width: 151, flex: 1 }} image={movie.metadata.y} alt={movie.title} />
+								<CardMedia component="img" sx={{ width: 151, flex: 1 }} image={item.metadata.x} alt={item.title} />
+								{/* <CardMedia component="img" sx={{ width: 151, flex: 1 }} image={item.metadata.y} alt={item.title} />
 								 */}
 							</Card>
 						))}
@@ -137,7 +140,7 @@ const Something = () => {
 						<Button size="small" sx={{ color: "black" }}>
 							Ver Mais
 						</Button>
-						<Button size="small" sx={{ color: "black" }}>
+						<Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
 							Like
 						</Button>
 					</CardActions>
@@ -147,4 +150,4 @@ const Something = () => {
 	);
 };
 
-export default Something;
+export default Feed;

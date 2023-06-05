@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/system";
@@ -10,6 +10,8 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { InputBase } from "@mui/material";
+import { loggedUserType } from "../services/api";
+import { UserContext } from "../App";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -33,7 +35,7 @@ const stringAvatar = (name: string) => {
 		sx: {
 			bgcolor: stringToColor(name),
 		},
-		children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+		children: `${name.split(" ")[0][0]}${name.split(" ")[0][1]}`,
 	};
 };
 
@@ -53,18 +55,27 @@ const Icons = styled(Box)(() => ({
 	background: "",
 }));
 
-const Navbar = () => {
+export type navbarPropsType = {
+	setLoggedUser: React.Dispatch<React.SetStateAction<loggedUserType | null>>;
+}
+
+const Navbar = (props: navbarPropsType) => {
 	const [menuStatus, setMenuStatus] = useState(false);
+
+	const handleLogoutOnCLick = () => {
+		props.setLoggedUser(null);
+	}
+	const loggedUser = useContext(UserContext)
 
 	return (
 		<AppBar position="sticky" sx={{ bgcolor: theme.palette.primary.main }}>
 			<StyledToolbar>
 				<Typography variant="h6">My Top Favorite</Typography>
 				<Search>
-					<InputBase placeholder="Procurar usuário"></InputBase>
+					<InputBase placeholder="Procurar usuário" type="search"></InputBase>
 				</Search>
 				<Icons onClick={(_e) => setMenuStatus(true)}>
-					<Avatar {...stringAvatar("Amanda FIaquinta")} />
+					<Avatar {...stringAvatar(loggedUser!.name)} />
 				</Icons>
 			</StyledToolbar>
 			<Menu
@@ -81,8 +92,7 @@ const Navbar = () => {
 					horizontal: "right",
 				}}
 			>
-				<MenuItem>Minha Conta</MenuItem>
-				<MenuItem>Sair</MenuItem>
+				<MenuItem onClick={handleLogoutOnCLick}>Sair</MenuItem>
 			</Menu>
 		</AppBar>
 	);

@@ -29,5 +29,6 @@ type responseType = {
 
 export const searchMovieByTitle = (title: string) =>
 axios.get<responseType>(
-	`https://api.themoviedb.org/3/search/movie?api_key=${api_key}&language=en-US&query=${title}&page=1&include_adult=false`
+	`https://api.themoviedb.org/3/search/movie?api_key=${api_key}&language=en-US&query=${title}&page=1&include_adult=false`,
+	 {withCredentials: false}
 );

@@ -12,8 +12,7 @@ import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 import { useState } from "react";
-import { authenticationType, axiosInstance, loggedUserType, login } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { authenticationType, loggedUserType, login } from "../services/api";
 
 type signInProps = {
 	setLoggedUser: React.Dispatch<React.SetStateAction<loggedUserType | null>>;
@@ -34,34 +33,16 @@ export default function SignIn(props: signInProps) {
 	const [password, setPassword] = useState("");
 	const [submitButtonInactive, setSubmitButtonInactive] = useState(false);
 
-	// const navigate = useNavigate();
-
 	const authenticateUser = (credentials: authenticationType) => {
 		login(credentials)
 			.then((response) =>{
-				console.log('Login')
-				// const cookie = response.headers["Set-Cookie"]![0];
-				const cookie = response.headers["Set-Cookie"];
-				console.log('Cookie:')
-				console.log(cookie)
-  			// axiosInstance.defaults.headers.Cookie = cookie;
 				props.setLoggedUser(response.data)
 			})
 			.catch((error) => {
-				console.log('Erro')
-				if (error.response.status === 404) {
-					window.alert("E-mail ou senha incorretos.");
-				}
+				if (error.response.status === 404) window.alert("E-mail ou senha incorretos.");
+				else console.log(error)
 				setSubmitButtonInactive(false);
 			});
-	};
-
-	const handleEmailOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		setEmail(event.target.value);
-	};
-
-	const handlePasswordOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		setPassword(event.target.value);
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -101,7 +82,7 @@ export default function SignIn(props: signInProps) {
 							autoComplete="email"
 							autoFocus
 							value={email}
-							onChange={handleEmailOnChange}
+							onChange={(e) => setEmail(e.target.value)}
 						/>
 						<TextField
 							margin="normal"
@@ -113,7 +94,7 @@ export default function SignIn(props: signInProps) {
 							id="password"
 							autoComplete="current-password"
 							value={password}
-							onChange={handlePasswordOnChange}
+							onChange={(e) => setPassword(e.target.value)}
 						/>
 						<Button
 							type="submit"
@@ -131,7 +112,7 @@ export default function SignIn(props: signInProps) {
 								</Link>
 							</Grid>
 							<Grid item>
-								<Link to="/signup" style={{ textDecoration: "none", color: theme.palette.primary.main }}>
+								<Link to="/sign-up" style={{ textDecoration: "none", color: theme.palette.primary.main }}>
 									{"Não possui uma conta? Cadastrar"}
 								</Link>
 							</Grid>
