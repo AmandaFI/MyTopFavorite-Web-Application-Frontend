@@ -23,14 +23,24 @@ export type userType = {
 
 export type postListItemType = {
   externalApiIdentifier: string;
-  imageUrl?: string;
-  details?: string;
+  imageUrl?: string | null;
+  details?: string | null;
   rank: number;
   title: string;
-  userComment?: string;
+  userComment: string;
 };
 
 export type listItemType = {
+  id: number;
+  externalApiIdentifier: string;
+  imageUrl?: string | null;
+  details?: string | null;
+  rank: number;
+  title: string;
+  userComment: string | null;
+};
+
+export type listItemPostResponse = {
   id: number;
   externalApiIdentifier: string;
   imageUrl: string | null;
@@ -38,6 +48,7 @@ export type listItemType = {
   rank: number;
   title: string;
   userComment: string | null;
+  list: listType;
 };
 
 export type categoryType = {
@@ -96,4 +107,7 @@ export const getSingleList = (id: number) => axios.get<completeListType>(`/lists
 export const allCategories = () => axios.get<Array<categoryType>>("/categories");
 
 // ----- ListItem
-export const insertItems = (item: postListItemType) => axios.post<listType>("/list_items", item);
+export const insertItem = (listId: number, item: postListItemType) =>
+  axios.post<listItemPostResponse>("/list_items", { listId, ...item });
+export const updateItem = (item: listItemType) => axios.put(`/list_items/${item.id}`, item);
+export const deleteItem = (itemId: number) => axios.delete(`/list_items/${itemId}`);

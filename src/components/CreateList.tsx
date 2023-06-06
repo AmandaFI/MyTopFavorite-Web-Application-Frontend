@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Box, Stack } from "@mui/material";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { styled } from "@mui/system";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
@@ -22,8 +22,16 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
-import { completeListType, getSingleList, insertItems, listType, postListItemType } from "../services/api";
-import { NewListContext } from "../App";
+import {
+  completeListType,
+  deleteItem,
+  getSingleList,
+  insertItem,
+  listItemType,
+  postListItemType,
+  updateItem,
+} from "../services/api";
+import { UserContext } from "../App";
 
 const style = {
   position: "absolute" as "absolute",
@@ -58,16 +66,19 @@ const CreateListArea = () => {
   }, []);
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
-  const [addedItems, setAddedItems] = useState<responseResultType[]>([]);
+  const [addedItems, setAddedItems] = useState<listItemType[]>([]);
   const searchTitle = useRef<HTMLInputElement | null>(null);
   const [chosenItem, setChosenItem] = useState<responseResultType | boolean>(false);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [apiResults, setApiResults] = useState<responseResultType[]>([]);
 
   const [replaceItemId, setReplaceItemId] = useState<number | null>(null);
-  const [itemInEdit, setItemInEdit] = useState<responseResultType | null>(null);
+  const [itemInEdit, setItemInEdit] = useState<listItemType | null>(null);
+  const [rankCount, setRankCount] = useState(0);
 
-  // FAZER A FUNÇAÕ DE PROCURAR COM ENTER
+  const loggedUser = useContext(UserContext);
+
+  // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
   const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // const title = searchTitle!.current!.value.trim();
     // console.log(title);
@@ -75,7 +86,6 @@ const CreateListArea = () => {
     // 	console.log(e.key);
     // 	// searchMovie(title);
     // }
-
     console.log(e.key);
   };
 
@@ -99,78 +109,95 @@ const CreateListArea = () => {
     setChosenItem(item);
   };
 
-  const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (replaceItemId === null) {
-      setAddedItems((previousItems) => [
-        ...previousItems,
-        {
-          ...(chosenItem as responseResultType),
-          user_input_text: chosenItemUsertext!.current!.value,
-        },
-      ]);
-    } else {
-      setAddedItems((previousItems) =>
-        previousItems.map((item, index) =>
-          index === replaceItemId
-            ? {
-                ...(chosenItem as responseResultType),
-                user_input_text: chosenItemUsertext!.current!.value,
-              }
-            : item
-        )
-      );
-      setReplaceItemId(null);
-    }
-    setOpenSearchItemModal(false);
+  const apiInputListItemTypeFormatter = (item: responseResultType, comment: string) => {
+    return {
+      externalApiIdentifier: String(item.id),
+      imageUrl: item.poster_path,
+      details: item.release_date,
+      rank: rankCount,
+      title: item.original_title,
+      userComment: comment,
+    };
   };
 
-  const handleReplaceItemOnClick = (replaceIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setReplaceItemId(replaceIndex);
+  const listItemTypeFormatter = (item: listItemType) => {
+    return {
+      id: item.id,
+      externalApiIdentifier: item.externalApiIdentifier,
+      imageUrl: item.imageUrl,
+      details: item.details,
+      rank: item.rank,
+      title: item.title,
+      userComment: item.userComment,
+    };
+  };
+
+  const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const newItem: postListItemType = apiInputListItemTypeFormatter(
+      chosenItem as responseResultType,
+      chosenItemUsertext!.current!.value
+    );
+    if (replaceItemId === null) {
+      insertItem(Number(list?.id), newItem)
+        .then((response) => {
+          const addedItem = listItemTypeFormatter(response.data);
+          setRankCount((previousValue) => previousValue + 1);
+
+          setAddedItems((previousItems) => [...previousItems, addedItem]);
+          setOpenSearchItemModal(false);
+        })
+        .catch((error) => console.log(error));
+    } else {
+      updateItem({ id: replaceItemId, ...newItem })
+        .then((response) => {
+          const replacedItem = listItemTypeFormatter(response.data);
+          setAddedItems((previousItems) =>
+            previousItems.map((item) => (item.id === replacedItem.id ? replacedItem : item))
+          );
+          setReplaceItemId(null);
+          setOpenSearchItemModal(false);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleReplaceItemOnClick = (replaceItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setReplaceItemId(replaceItemId);
     setOpenSearchItemModal(true);
   };
 
-  const handleRemoveItemOnClick =
-    (removedItemIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      setAddedItems((previousItems) => previousItems.filter((_item, index) => index !== removedItemIndex));
-    };
+  const handleRemoveItemOnClick = (removeItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    deleteItem(removeItemId)
+      .then((_response) => {
+        setAddedItems((previousItems) => previousItems.filter((item) => item.id !== removeItemId));
+      })
+      .catch((error) => console.log(error));
+  };
 
   const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setItemInEdit((previousItem) => {
-      return {
-        ...(previousItem as responseResultType),
-        user_input_text: e.target.value,
-      };
-    });
+    const editedItem = {
+      ...itemInEdit!,
+      userComment: e.target.value,
+    };
+    setItemInEdit(editedItem);
   };
 
   const handleSaveItemEditedOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setAddedItems((previousItems) =>
-      previousItems.map((item) => (item.id === itemInEdit!.id ? (itemInEdit as responseResultType) : item))
-    );
-    setItemInEdit(null);
+    updateItem(itemInEdit!)
+      .then((response) => {
+        const editedItem = listItemTypeFormatter(response.data);
+        setAddedItems((previousItems) =>
+          previousItems.map((item) =>
+            item.externalApiIdentifier === itemInEdit?.externalApiIdentifier ? editedItem : item
+          )
+        );
+        setItemInEdit(null);
+      })
+      .catch((error) => console.log(error));
   };
 
   // const handleSaveListItemsOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-  //   const items: Array<postListItemType> = addedItems.reduce(
-  //     (acc: Array<postListItemType>, item, index) => [
-  //       ...acc,
-  //       {
-  //         externalApiIdentifier: String(item.id),
-  //         imageUrl: item.poster_path,
-  //         details: item.release_date,
-  //         rank: index + 1,
-  //         title: item.title,
-  //         userComment: item.user_input_text,
-  //       },
-  //     ],
-  //     []
-  //   );
-  //   console.log(newList!.id);
-  //   insertItems(newList!.id, items)
-  //     .then((_response) => {
-  //       navigate("/manage-lists");
-  //     })
-  //     .catch((error) => console.log(error));
+
   // };
 
   return (
@@ -182,7 +209,7 @@ const CreateListArea = () => {
               <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
                 <Icons>
                   <Box>
-                    <Avatar sx={{ mt: 2, ml: 2 }}>AI</Avatar>
+                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser!.name[0]}${loggedUser!.name[1]}`}</Avatar>
                     <Typography sx={{ ml: 2, mb: 2 }}>username</Typography>
                   </Box>
                   <Typography variant="h5" m={2}>
@@ -195,7 +222,7 @@ const CreateListArea = () => {
 
                 <CardContent>
                   {addedItems.map((item, index) => {
-                    if (item.id === itemInEdit?.id)
+                    if (item.externalApiIdentifier === itemInEdit?.externalApiIdentifier)
                       return (
                         <Card sx={{ display: "flex", mb: 2 }} key={index}>
                           <Box
@@ -212,10 +239,10 @@ const CreateListArea = () => {
                                 </Typography>
                                 <Stack direction="column">
                                   <Typography component="div" variant="h5">
-                                    {item.original_title}
+                                    {item.title}
                                   </Typography>
                                   <Typography variant="subtitle1" color="text.secondary" component="div">
-                                    {item.release_date}
+                                    {item.details}
                                   </Typography>
                                 </Stack>
                               </Stack>
@@ -224,7 +251,7 @@ const CreateListArea = () => {
                                   id="outlined-multiline-static"
                                   multiline
                                   rows={4}
-                                  value={itemInEdit!.user_input_text}
+                                  value={itemInEdit!.userComment}
                                   onChange={handleUserCommentOnChange}
                                 />
                                 <Stack direction="row">
@@ -257,7 +284,7 @@ const CreateListArea = () => {
                             sx={{ width: 151, flex: 1 }}
                             // image={item.poster_path}
                             alt="Poster do filme"
-                            src={`${posterInitialUrl}${item.poster_path}`}
+                            src={`${posterInitialUrl}${item.imageUrl}`}
                           />
                         </Card>
                       );
@@ -278,14 +305,14 @@ const CreateListArea = () => {
                                 </Typography>
                                 <Stack direction="column">
                                   <Typography component="div" variant="h5">
-                                    {item.original_title}
+                                    {item.title}
                                   </Typography>
                                   <Typography variant="subtitle1" color="text.secondary" component="div">
-                                    {item.release_date}
+                                    {item.details}
                                   </Typography>
                                 </Stack>
                               </Stack>
-                              <Typography component="div">{item.user_input_text}</Typography>
+                              <Typography component="div">{item.userComment}</Typography>
                               <Stack direction="row" spacing={1}>
                                 <Button
                                   size="small"
@@ -303,7 +330,7 @@ const CreateListArea = () => {
                                     bgcolor: theme.palette.secondary.main,
                                     color: "white",
                                   }}
-                                  onClick={handleReplaceItemOnClick(index)}
+                                  onClick={handleReplaceItemOnClick(item.id)}
                                 >
                                   Substituir
                                 </Button>
@@ -313,7 +340,7 @@ const CreateListArea = () => {
                                     bgcolor: theme.palette.secondary.main,
                                     color: "white",
                                   }}
-                                  onClick={handleRemoveItemOnClick(index)}
+                                  onClick={handleRemoveItemOnClick(item.id)}
                                 >
                                   Remover
                                 </Button>
@@ -325,7 +352,7 @@ const CreateListArea = () => {
                             sx={{ width: 151, flex: 1 }}
                             // image={item.poster_path}
                             alt="Poster do filme"
-                            src={`${posterInitialUrl}${item.poster_path}`}
+                            src={`${posterInitialUrl}${item.imageUrl}`}
                           />
                         </Card>
                       );
