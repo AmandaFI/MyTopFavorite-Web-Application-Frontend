@@ -25,9 +25,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
-
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { completeListType, getSingleList, listItemType, listType } from "../services/api";
+import { completeListType, getSingleList, listItemType } from "../services/api";
 
 const Icons = styled(Box)(() => ({
   display: "flex",

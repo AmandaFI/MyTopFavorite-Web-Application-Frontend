@@ -73,6 +73,7 @@ export type completeListType = {
   category: categoryType;
   user: loggedUserType;
   items: Array<listItemType>;
+  shownItems?: number;
 };
 
 export type createList = {
@@ -91,7 +92,9 @@ export const loginStatus = () => axios.get<loggedUserType>("/sessions/status");
 
 // ----- User
 export const createUser = (newUser: userType) => axios.post<loggedUserType>("/users", newUser);
-export const loadFeed = () => axios.get<Array<completeListType>>("/users/followed_users_lists");
+export const initialLoadFeed = () => axios.get<Array<completeListType>>("/users/followed_users_lists");
+export const paginationLoadFeed = (pageNumber: number) =>
+  axios.get<Array<completeListType>>(`/users/followed_users_lists?page=${pageNumber}&per_page=1`);
 
 // ----- List
 export const userLists = () => axios.get<Array<listType>>("/lists");
