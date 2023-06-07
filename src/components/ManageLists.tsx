@@ -28,16 +28,12 @@ const style = {
   p: 4,
 };
 
-type cardType = { itemId: number; category: string; title: string; date: string; apiId: number };
-
 const ManageLists = () => {
   const [loggedUserLists, setLoggedUserLists] = useState<Array<listType>>([]);
   const [openNewListForm, setOpenNewListForm] = useState(false);
   const [categories, setCategories] = useState<Array<categoryType>>([]);
   const [listTitle, setListTitle] = useState("");
   const [listCategory, setListCategory] = useState<categoryType>({ id: -1, name: "" });
-
-  const [createdList, setCreatedList] = useState<listType | null>(null);
 
   const navigate = useNavigate();
 

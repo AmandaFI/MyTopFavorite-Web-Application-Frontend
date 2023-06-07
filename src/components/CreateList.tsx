@@ -22,6 +22,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
+import { UserContext } from "../App";
 import {
   completeListType,
   deleteItem,
@@ -30,8 +31,8 @@ import {
   listItemType,
   postListItemType,
   updateItem,
+  updateList,
 } from "../services/api";
-import { UserContext } from "../App";
 
 const style = {
   position: "absolute" as "absolute",
@@ -196,9 +197,16 @@ const CreateListArea = () => {
       .catch((error) => console.log(error));
   };
 
-  // const handleSaveListItemsOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-
-  // };
+  // VERIFICAR SITUACAO SE ESTA ATUALIZANDO OU NAO, VER QUESTAO DA API RECEBER TYUPE ANY
+  const handlePublishListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    updateList({ id: list!.id, draft: true })
+      .then((_response) => {
+        setList((previousList) => {
+          return { ...previousList!, draft: true };
+        });
+      })
+      .catch((error) => console.log(error));
+  };
 
   return (
     <>
@@ -209,8 +217,8 @@ const CreateListArea = () => {
               <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
                 <Icons>
                   <Box>
-                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser!.name[0]}${loggedUser!.name[1]}`}</Avatar>
-                    <Typography sx={{ ml: 2, mb: 2 }}>username</Typography>
+                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser?.name[0]}${loggedUser!.name[1]}`}</Avatar>
+                    <Typography sx={{ ml: 2, mb: 2 }}>{loggedUser?.name}</Typography>
                   </Box>
                   <Typography variant="h5" m={2}>
                     {list?.title}
@@ -282,7 +290,6 @@ const CreateListArea = () => {
                           <CardMedia
                             component="img"
                             sx={{ width: 151, flex: 1 }}
-                            // image={item.poster_path}
                             alt="Poster do filme"
                             src={`${posterInitialUrl}${item.imageUrl}`}
                           />
@@ -350,7 +357,6 @@ const CreateListArea = () => {
                           <CardMedia
                             component="img"
                             sx={{ width: 151, flex: 1 }}
-                            // image={item.poster_path}
                             alt="Poster do filme"
                             src={`${posterInitialUrl}${item.imageUrl}`}
                           />
@@ -363,7 +369,9 @@ const CreateListArea = () => {
                 <Button sx={buttonStyle} onClick={(_e) => setOpenSearchItemModal(true)}>
                   Adicionar
                 </Button>
-                <Button sx={buttonStyle}>Publicar</Button>
+                <Button sx={buttonStyle} onClick={handlePublishListOnClick}>
+                  Publicar
+                </Button>
                 <Link to="/manage-lists" style={{ textDecoration: "none", color: "black" }}>
                   <Button sx={buttonStyle}>Cancelar</Button>
                 </Link>

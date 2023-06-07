@@ -40,7 +40,7 @@ export type listItemType = {
   userComment: string | null;
 };
 
-export type listItemPostResponse = {
+export type listItemApiResponse = {
   id: number;
   externalApiIdentifier: string;
   imageUrl: string | null;
@@ -105,12 +105,13 @@ export const createList = (title: string, category_id: number) =>
   axios.post<listType>("/lists", { title: title, category_id: category_id });
 export const likeList = (id: number) => axios.post<loggedUserType>(`/lists/${id}/like`);
 export const getSingleList = (id: number) => axios.get<completeListType>(`/lists/${id}`);
+export const updateList = (list: any) => axios.put<listType>(`/lists/${list.id}`, list);
 
 // ----- Category
 export const allCategories = () => axios.get<Array<categoryType>>("/categories");
 
 // ----- ListItem
 export const insertItem = (listId: number, item: postListItemType) =>
-  axios.post<listItemPostResponse>("/list_items", { listId, ...item });
-export const updateItem = (item: listItemType) => axios.put(`/list_items/${item.id}`, item);
+  axios.post<listItemApiResponse>("/list_items", { listId, ...item });
+export const updateItem = (item: listItemType) => axios.put<listItemApiResponse>(`/list_items/${item.id}`, item);
 export const deleteItem = (itemId: number) => axios.delete(`/list_items/${itemId}`);

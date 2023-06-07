@@ -23,58 +23,6 @@ export type ListMovieType = {
   posterUrl: string;
 };
 
-// type itemsPerListCountType = {
-//   listId: number
-// }
-
-export const MOVIES: ListMovieType[] = [
-  {
-    id: 1,
-    rank: 1,
-    title: "Star Trek",
-    user_comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat. Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor",
-    extraInfo: "2009",
-    posterUrl: "src\\assets\\starTrek.jpg",
-  },
-  {
-    id: 2,
-    rank: 2,
-    title: "Rocky",
-    user_comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat. Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor",
-    extraInfo: "1976",
-    posterUrl: "src\\assets\\rocky.jpg",
-  },
-  {
-    id: 3,
-    rank: 3,
-    title: "Jurassic Park",
-    user_comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat. Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor",
-    extraInfo: "1993",
-    posterUrl: "src\\assets\\jurassicPark.jpg",
-  },
-  {
-    id: 4,
-    rank: 4,
-    title: "Star Trek",
-    user_comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat. Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor",
-    extraInfo: "2009",
-    posterUrl: "src\\assets\\starTrek.jpg",
-  },
-  {
-    id: 5,
-    rank: 5,
-    title: "Rocky",
-    user_comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut nibh tellus. In hac habitasse platea dictumst. Praesent vel eleifend est. In tincidunt diam non tortor tempus dictum. Proin ac eleifend ligula. Praesent non consequat urna. Sed ut lacus a neque semper vehicula vel nec erat. Mauris non dui ac augue vestibulum lacinia. Donec ac dolor porta eros blandit tris Donec ac dolor",
-    extraInfo: "1976",
-    posterUrl: "src\\assets\\rocky.jpg",
-  },
-];
-
 const Icons = styled(Box)(() => ({
   display: "flex",
   justifyContent: "space-between",
@@ -123,6 +71,7 @@ const Feed = () => {
   const handleLoadMoreListsOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     paginationLoadFeed(databasePage).then((response) => {
       setFeedContent((previousLists) => [...previousLists, ...preProcessListsForFeed(response.data)]);
+      setDatabasePage((previousValue) => previousValue + 1);
     });
   };
 

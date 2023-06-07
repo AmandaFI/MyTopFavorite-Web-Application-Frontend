@@ -1,16 +1,13 @@
 import { Box, Stack, TextField } from "@mui/material";
-import Navbar from "./Navbar";
-import Sidebar, { sidebarVersionType } from "./Sidebar";
-import { useLocation, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Avatar from "@mui/material/Avatar";
 import Container from "@mui/material/Container";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import theme from "../theme";
 import Typography from "@mui/material/Typography";
-import { ListMovieType, MOVIES } from "./Feed";
 import { styled } from "@mui/system";
 import Button from "@mui/material/Button";
 import CardActions from "@mui/material/CardActions";
@@ -25,7 +22,8 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
-import { completeListType, getSingleList, listItemType } from "../services/api";
+import { completeListType, deleteItem, getSingleList, listItemType, updateItem } from "../services/api";
+import { UserContext } from "../App";
 
 const Icons = styled(Box)(() => ({
   display: "flex",
@@ -50,7 +48,6 @@ const style = {
 };
 
 const EditList = () => {
-  const [apiResults, setApiResults] = useState(MOVIES);
   const [listInEdit, setListInEdit] = useState<completeListType | null>(null);
   const [itemInEdit, setItemInEdit] = useState<listItemType | null>(null);
 
@@ -60,6 +57,8 @@ const EditList = () => {
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [tmdbApiResults, setTmdbApiResults] = useState<responseResultType[]>([]);
 
+  const loggedUser = useContext(UserContext);
+  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
@@ -68,17 +67,8 @@ const EditList = () => {
       .catch((error) => console.log(error));
   }, []);
 
-  const handleItemEditOnClick = (item: listItemType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setItemInEdit(item);
-  };
-
-  const handleCancelEditOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setItemInEdit(null);
-  };
-
   const handleSearchItemClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const title = searchTitle!.current!.value.trim();
-    console.log(title);
     if (title !== "") {
       searchMovie(title);
     }
@@ -97,44 +87,78 @@ const EditList = () => {
     setChosenItem(item);
   };
 
-  const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // if (chosenItem !== null) {
-    //   const replaceItem: ListMovieType = {
-    //     id: itemInEdit!.id,
-    //     rank: itemInEdit!.rank,
-    //     title: (chosenItem as responseResultType).title,
-    //     user_comment: chosenItemUsertext!.current!.value,
-    //     extraInfo: (chosenItem as responseResultType).release_date,
-    //     posterUrl: `https://image.tmdb.org/t/p/w500/${(chosenItem as responseResultType).poster_path}`,
-    //   };
-    //   setItemInEdit(replaceItem);
-    //   setOpenSearchItemModal(false);
-    // }
+  const listItemTypeFormatter = (item: listItemType) => {
+    return {
+      id: item.id,
+      externalApiIdentifier: item.externalApiIdentifier,
+      imageUrl: item.imageUrl,
+      details: item.details,
+      rank: item.rank,
+      title: item.title,
+      userComment: item.userComment,
+    };
   };
 
-  const handleOpenModalOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // setOpenSearchItemModal(true);
+  const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (chosenItem !== null) {
+      const newItem: listItemType = {
+        id: itemInEdit!.id,
+        externalApiIdentifier: String(chosenItem.id),
+        imageUrl: chosenItem.poster_path,
+        details: chosenItem.release_date,
+        rank: itemInEdit!.rank,
+        title: chosenItem.original_title,
+        userComment: chosenItemUsertext!.current!.value,
+      };
+      updateItem(newItem)
+        .then((response) => {
+          setListInEdit((previousList) => {
+            return {
+              ...previousList!,
+              items: previousList!.items.map((item) =>
+                item.id === newItem.id ? listItemTypeFormatter(response.data) : item
+              ),
+            };
+          });
+          setItemInEdit(null);
+          setOpenSearchItemModal(false);
+        })
+        .catch((error) => console.log(error));
+    }
   };
 
   const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // setItemInEdit((previousItems) => {
-    //   return { ...(previousItems as ListMovieType), user_comment: e.target.value };
-    // });
+    setItemInEdit((previousItem) => {
+      return { ...previousItem!, userComment: e.target.value };
+    });
   };
 
   const handleSaveChangesOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // setListInEdit((previousItems) => previousItems.map((item) => (item.id === itemInEdit?.id ? itemInEdit : item)));
-    // setItemInEdit(null);
-  };
-
-  const handleSaveEditedListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // setApiResults(listInEdit);
+    updateItem(itemInEdit!)
+      .then((_response) => {
+        setListInEdit((previousList) => {
+          return {
+            ...previousList!,
+            items: previousList!.items.map((item) => (item.id === itemInEdit!.id ? itemInEdit! : item)),
+          };
+        });
+        setItemInEdit(null);
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleRemoveItemOnClick = (itemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // if (listInEdit.length < 4) {
-    //   window.alert("Uma lista precisa ter no mínimo 3 items.");
-    // } else setListInEdit((previousItems) => previousItems.filter((item) => item.id !== itemId));
+    if (listInEdit!.items.length < 4) {
+      window.alert("Lista precisa ter no mínimo 3 items.");
+    } else {
+      deleteItem(itemId)
+        .then((_response) => {
+          setListInEdit((previousList) => {
+            return { ...previousList!, items: previousList!.items.filter((item) => Number(item.id) !== itemId) };
+          });
+        })
+        .catch((error) => console.log(error));
+    }
   };
 
   return (
@@ -146,8 +170,8 @@ const EditList = () => {
               <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
                 <Icons>
                   <Box>
-                    <Avatar sx={{ mt: 2, ml: 2 }}>AI</Avatar>
-                    <Typography sx={{ ml: 2, mb: 2 }}>username</Typography>
+                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser?.name[0]}${loggedUser!.name[1]}`}</Avatar>
+                    <Typography sx={{ ml: 2, mb: 2 }}>{loggedUser?.name}</Typography>
                   </Box>
                   <Typography variant="h5" m={2}>
                     {listInEdit?.title}
@@ -157,10 +181,10 @@ const EditList = () => {
                   </Box>
                 </Icons>
                 <CardContent>
-                  {listInEdit?.items.map((movie) => {
-                    if (movie.id === itemInEdit?.id)
+                  {listInEdit?.items.map((item) => {
+                    if (item.id === itemInEdit?.id)
                       return (
-                        <Card sx={{ display: "flex", mb: 2 }} key={movie.id}>
+                        <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
                           <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
                             <CardContent sx={{ flex: "1 0 auto" }}>
                               <Stack direction="row" spacing={2}>
@@ -169,7 +193,7 @@ const EditList = () => {
                                 </Typography>
                                 <Stack direction="column">
                                   <Typography component="div" variant="h5">
-                                    {movie.title}
+                                    {item.title}
                                   </Typography>
                                   <Typography
                                     variant="subtitle1"
@@ -211,7 +235,7 @@ const EditList = () => {
                                       mt: 1,
                                       mr: 1,
                                     }}
-                                    onClick={handleOpenModalOnClick}
+                                    onClick={(_e) => setOpenSearchItemModal(true)}
                                   >
                                     Substituir
                                   </Button>
@@ -223,7 +247,7 @@ const EditList = () => {
                                       mt: 1,
                                       mr: 1,
                                     }}
-                                    onClick={handleCancelEditOnClick}
+                                    onClick={(_e) => setItemInEdit(null)}
                                   >
                                     Cancelar
                                   </Button>
@@ -241,7 +265,7 @@ const EditList = () => {
                       );
                     else
                       return (
-                        <Card sx={{ display: "flex", mb: 2 }} key={movie.id}>
+                        <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
                           <Box
                             sx={{
                               display: "flex",
@@ -253,11 +277,11 @@ const EditList = () => {
                             <CardContent sx={{ flex: "1 0 auto" }}>
                               <Stack direction="row" spacing={2}>
                                 <Typography component="div" variant="h3">
-                                  {movie.rank}
+                                  {item.rank}
                                 </Typography>
                                 <Stack direction="column">
                                   <Typography component="div" variant="h5">
-                                    {movie.title}
+                                    {item.title}
                                   </Typography>
                                   <Typography
                                     variant="subtitle1"
@@ -265,13 +289,13 @@ const EditList = () => {
                                     component="div"
                                     className="view"
                                   >
-                                    {movie.details}
+                                    {item.details}
                                   </Typography>
                                 </Stack>
                               </Stack>
 
                               <Stack direction="column" sx={{ display: "flex", justiyContent: "space-between" }}>
-                                <Typography component="div">{movie.userComment}</Typography>
+                                <Typography component="div">{item.userComment}</Typography>
                                 <Stack direction="row" sx={{ display: "flex", justiyContent: "space-between" }}>
                                   <Button
                                     size="small"
@@ -282,14 +306,14 @@ const EditList = () => {
                                       bgcolor: theme.palette.secondary.main,
                                       color: "white",
                                     }}
-                                    onClick={handleItemEditOnClick(movie)}
+                                    onClick={(_e) => setItemInEdit(item)}
                                   >
                                     Editar
                                   </Button>
                                   <Button
                                     size="small"
                                     sx={{ mt: 1, bgcolor: theme.palette.secondary.main, color: "white" }}
-                                    onClick={handleRemoveItemOnClick(movie.id)}
+                                    onClick={handleRemoveItemOnClick(item.id)}
                                   >
                                     Remover
                                   </Button>
@@ -300,7 +324,7 @@ const EditList = () => {
                           <CardMedia
                             component="img"
                             sx={{ width: 151, flex: 1 }}
-                            src={`${posterInitialUrl}${movie.imageUrl}`}
+                            src={`${posterInitialUrl}${item.imageUrl}`}
                             alt="Live from space album cover"
                           />
                         </Card>
@@ -308,7 +332,7 @@ const EditList = () => {
                   })}
                 </CardContent>
                 <CardActions>
-                  <Link to="/manage-lists" style={{ textDecoration: "none" }}>
+                  {/* <Link to="/manage-lists" style={{ textDecoration: "none" }}>
                     <Button
                       size="small"
                       sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
@@ -316,10 +340,14 @@ const EditList = () => {
                     >
                       Salvar
                     </Button>
-                  </Link>
+                  </Link> */}
 
                   <Link to="/manage-lists" style={{ textDecoration: "none" }}>
-                    <Button size="small" sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}>
+                    <Button
+                      size="small"
+                      sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
+                      onClick={(e) => navigate("/manage-lists")}
+                    >
                       Cancelar
                     </Button>
                   </Link>
