@@ -7,12 +7,12 @@ DESIGN:
 -- Incluindo o poster do filme na tabela
 -- Melhorar apresentação das informações na sidebar
 -- Alguns botões somem no hover (cor igual a cor de fundo e texto)
+-- Exibir quantidades de likes no botão like
+-- Diminuir largura dos posts no feed ? (e na pagina de um usuario buscado)
 
 
 COMPONENTS 
 
--- Página para seguir outro usuário
--- Caixa de resultados da busca de usuário
 
 
 FUNCIONALIDADES
@@ -20,7 +20,8 @@ FUNCIONALIDADES
 -- Ao clicar no em uma lista, abri-la inteira em outra página
 -- Botão para editar titulo da lista
 -- Separar listas postadas de não postadas usando tabs
--- Mudar barra de busca para combobox server side load
+-- Paginar itens da lista, ao clicar em ver mais exibir alguns items não todos
+
 
 PROBLEMAS ATUAIS
 

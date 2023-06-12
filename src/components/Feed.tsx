@@ -1,28 +1,18 @@
 import * as React from "react";
+import theme from "../theme";
+import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from "../services/api";
+import { useEffect, useState } from "react";
+import { posterInitialUrl } from "../services/tmdbApi";
+import { Icons } from "../styleHelpers";
 import { Box, Stack } from "@mui/material";
-import { styled } from "@mui/system";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Avatar from "@mui/material/Avatar";
-import theme from "../theme";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
-import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from "../services/api";
-import { useEffect, useState } from "react";
-import { posterInitialUrl } from "../services/tmdbApi";
-import { Icons } from "../helpers";
-
-export type ListMovieType = {
-  id: number;
-  rank: number;
-  title: string;
-  user_comment: string;
-  extraInfo: string;
-  posterUrl: string;
-};
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
@@ -30,13 +20,14 @@ const Feed = () => {
   const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
   const [databasePage, setDatabasePage] = useState(1);
 
+  const shuffle = (array: Array<any>) => array.sort((_a, _b) => 0.5 - Math.random());
+
   const preProcessListsForFeed = (lists: Array<completeListType>) => {
     const processedLists: Array<completeListType> = lists.reduce(
       (acc: Array<completeListType>, item) => [...acc, { ...item, shownItems: SHOWN_ITEMS_PER_LIST }],
       []
     );
-    // shuffle array
-    return processedLists.sort((_a, _b) => 0.5 - Math.random());
+    return shuffle(processedLists);
   };
 
   useEffect(() => {

@@ -1,7 +1,9 @@
-import { Avatar, Box, Button, Card, CardActions, CardContent, CardMedia, Stack, Typography } from "@mui/material";
 import theme from "../theme";
-import { Icons } from "../helpers";
+import { Icons } from "../styleHelpers";
 import { useEffect, useState } from "react";
+import { Avatar, Box, Button, Card, CardActions, CardContent, CardMedia, Stack, Typography } from "@mui/material";
+import { posterInitialUrl } from "../services/tmdbApi";
+import { useParams } from "react-router-dom";
 import {
   completeListType,
   searchUserById,
@@ -10,10 +12,6 @@ import {
   followUser,
   unfollowUser,
 } from "../services/api";
-import { posterInitialUrl } from "../services/tmdbApi";
-import { useParams } from "react-router-dom";
-
-const SHOWN_ITEMS_PER_LIST: number = 3;
 
 export const UserPublicProfile = () => {
   const { id } = useParams();
@@ -24,13 +22,13 @@ export const UserPublicProfile = () => {
   useEffect(() => {
     searchUserById(+id!)
       .then((response) => {
+        console.log("carregando listas");
         setSearchedUser(response.data);
         userPublishedLists(+id!, true).then((response) => setSearchedUserLists(response.data as completeListType[]));
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [id]);
 
-  // Consertar unfollow, unpermmited params de novo
   const handleFollowUserOnCLick = () => {
     if (following) {
       unfollowUser(+id!)
@@ -47,7 +45,7 @@ export const UserPublicProfile = () => {
     <>
       <Box sx={{ display: "flex", flex: 10 }}>
         <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
-          <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"25%"} minHeight={"10%"}>
+          <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"15%"} minHeight={"8%"}>
             <Stack direction="row">
               <Button size="medium" sx={{ color: "black", backgroundColor: "white" }} onClick={handleFollowUserOnCLick}>
                 {following ? "Deixar de seguir" : "Seguir"}
@@ -55,7 +53,7 @@ export const UserPublicProfile = () => {
             </Stack>
           </Box>
           <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
-            {searchedUserLists.map((list, listIndex) => (
+            {searchedUserLists.map((list) => (
               <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
                 <Icons>
                   <Box>

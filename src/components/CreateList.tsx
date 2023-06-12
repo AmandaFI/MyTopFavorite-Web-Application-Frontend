@@ -34,18 +34,7 @@ import {
   putListType,
   updateList,
 } from "../services/api";
-import { Icons, buttonStyle } from "../helpers";
-
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "50%",
-  bgcolor: "background.paper",
-  borderRadius: "5px",
-  p: 4,
-};
+import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
 
 const CreateListArea = () => {
   const [list, setList] = useState<completeListType | null>(null);
@@ -377,7 +366,7 @@ const CreateListArea = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <Box sx={style} component="form">
+            <Box sx={modalBoxStyle} component="form">
               <Stack direction="column" display={"flex"} spacing={2}>
                 <Typography variant="h5" component="div">
                   Adicione um novo item!

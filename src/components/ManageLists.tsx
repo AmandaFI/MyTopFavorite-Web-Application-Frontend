@@ -1,8 +1,11 @@
-import Box from "@mui/material/Box";
 import * as React from "react";
 import { useContext, useEffect, useState } from "react";
-import { Stack } from "@mui/material";
+import { modalBoxStyle } from "../styleHelpers";
+import theme from "../theme";
+import { UserContext } from "../App";
 import { Link, useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+import { Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -10,11 +13,9 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import IconButton from "@mui/material/IconButton";
-import theme from "../theme";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { NewListContext, UserContext } from "../App";
 import {
   categoryType,
   deleteList,
@@ -25,26 +26,15 @@ import {
   createList,
 } from "../services/api";
 
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  borderRadius: "5px",
-  p: 4,
-};
-
 const ManageLists = () => {
+  const navigate = useNavigate();
+  const loggedUser = useContext(UserContext);
+
   const [loggedUserLists, setLoggedUserLists] = useState<Array<simplifiedListType>>([]);
   const [openNewListForm, setOpenNewListForm] = useState(false);
   const [categories, setCategories] = useState<Array<categoryType>>([]);
   const [listTitle, setListTitle] = useState("");
   const [listCategory, setListCategory] = useState<categoryType>({ id: -1, name: "" });
-
-  const navigate = useNavigate();
-  const loggedUser = useContext(UserContext);
 
   useEffect(() => {
     userLists(loggedUser!.id)
@@ -102,11 +92,7 @@ const ManageLists = () => {
         </CardContent>
         <CardActions disableSpacing sx={{ mt: "auto", display: "flex" }}>
           <Stack direction="row" display="flex" justifyContent="end">
-            <Link
-              to={`/edit-list/${card.id}`}
-              //verificar se tittle não é null
-              style={{ textDecoration: "none", color: "white" }}
-            >
+            <Link to={`/edit-list/${card.id}`} style={{ textDecoration: "none", color: "white" }}>
               <Button size="small" onClick={handleEditListOnClick(card.id)}>
                 Editar
               </Button>
@@ -178,7 +164,7 @@ const ManageLists = () => {
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
             >
-              <Box sx={style} component="form">
+              <Box sx={modalBoxStyle} component="form">
                 <Stack direction="column" display={"flex"} spacing={2}>
                   <Typography variant="h5" component="div">
                     Crie uma nova lista!

@@ -1,37 +1,21 @@
 import * as React from "react";
 import { useContext, useState } from "react";
+import theme from "../theme";
+import { userType, logout, searchUsersByName } from "../services/api";
+import { UserContext } from "../App";
+import { useNavigate } from "react-router-dom";
+import { stringToColor } from "../styleHelpers";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/system";
 import Typography from "@mui/material/Typography";
-import theme from "../theme";
 import { Autocomplete, Box, CircularProgress, TextField } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { InputBase } from "@mui/material";
-import { userType, logout, searchUsersByName } from "../services/api";
-import { UserContext } from "../App";
 import { TopicSharp } from "@mui/icons-material";
 import SliderValueLabel from "@mui/material/Slider/SliderValueLabel";
-import { useNavigate } from "react-router-dom";
-
-const stringToColor = (string: string) => {
-  let hash = 0;
-  let i;
-  let color = "#";
-
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-
-  return color;
-};
 
 const stringAvatar = (name: string) => {
   return {
@@ -80,7 +64,6 @@ const Navbar = (props: navbarPropsType) => {
     const value = e.target.value;
     setSearchedUser(value);
     if (value.length > 0 && value.length % 2 === 0) {
-      console.log("procurando");
       searchUsersByName(value)
         .then((response) => setUsersFound(response.data))
         .catch((error) => console.log(error));
@@ -89,7 +72,6 @@ const Navbar = (props: navbarPropsType) => {
 
   const handleSelectUserOnChange = (_e: React.SyntheticEvent<Element, Event>, value: userType | null) => {
     navigate(`/user-profile/${value!.id}`);
-    console.log(value!.id);
   };
 
   return (

@@ -1,41 +1,28 @@
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import theme from "../theme";
+import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
+import { completeListType, deleteItem, getSingleList, simplifiedListItemType, updateItem } from "../services/api";
+import { UserContext } from "../App";
+import { Icons, buttonStyle } from "../styleHelpers";
 import { Box, Stack, TextField } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Avatar from "@mui/material/Avatar";
 import Container from "@mui/material/Container";
-import React, { useEffect, useState, useRef, useContext } from "react";
-import theme from "../theme";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/system";
 import Button from "@mui/material/Button";
 import CardActions from "@mui/material/CardActions";
-import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import Paper from "@mui/material/Paper";
 import Modal from "@mui/material/Modal";
-import { Link } from "react-router-dom";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
-import { completeListType, deleteItem, getSingleList, simplifiedListItemType, updateItem } from "../services/api";
-import { UserContext } from "../App";
-import { Icons, buttonStyle } from "../helpers";
-
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "50%",
-  bgcolor: "background.paper",
-  borderRadius: "5px",
-  p: 4,
-};
 
 const EditList = () => {
   const [listInEdit, setListInEdit] = useState<completeListType | null>(null);
@@ -350,7 +337,7 @@ const EditList = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <Box sx={style} component="form">
+            <Box sx={searchItemsBoxStyle} component="form">
               <Stack direction="column" display={"flex"} spacing={2}>
                 <Typography variant="h5" component="div">
                   Adicione um novo item!
