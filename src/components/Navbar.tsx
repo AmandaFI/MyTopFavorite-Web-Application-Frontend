@@ -10,7 +10,7 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { InputBase } from "@mui/material";
-import { userType, logout, searchUsersByName, userType } from "../services/api";
+import { userType, logout, searchUsersByName } from "../services/api";
 import { UserContext } from "../App";
 import { TopicSharp } from "@mui/icons-material";
 import SliderValueLabel from "@mui/material/Slider/SliderValueLabel";

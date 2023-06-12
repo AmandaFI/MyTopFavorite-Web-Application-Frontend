@@ -28,9 +28,10 @@ import {
   deleteItem,
   getSingleList,
   insertItem,
-  listItemType,
+  simplifiedListItemType,
   postListItemType,
   updateItem,
+  putListType,
   updateList,
 } from "../services/api";
 import { Icons, buttonStyle } from "../helpers";
@@ -57,14 +58,14 @@ const CreateListArea = () => {
   }, []);
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
-  const [addedItems, setAddedItems] = useState<listItemType[]>([]);
+  const [addedItems, setAddedItems] = useState<simplifiedListItemType[]>([]);
   const searchTitle = useRef<HTMLInputElement | null>(null);
   const [chosenItem, setChosenItem] = useState<responseResultType | boolean>(false);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [apiResults, setApiResults] = useState<responseResultType[]>([]);
 
   const [itemToBeReplaced, setItemToBeReplaced] = useState<number | null>(null);
-  const [itemBeingEdited, setItemBeingEdited] = useState<listItemType | null>(null);
+  const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
   const [rankCount, setRankCount] = useState(0);
 
   const loggedUser = useContext(UserContext);
@@ -112,7 +113,7 @@ const CreateListArea = () => {
     };
   };
 
-  const listItemTypeFormatter = (item: listItemType) => {
+  const listItemTypeFormatter = (item: simplifiedListItemType) => {
     return {
       id: item.id,
       externalApiIdentifier: item.externalApiIdentifier,

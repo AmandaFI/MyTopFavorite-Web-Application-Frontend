@@ -22,7 +22,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
-import { completeListType, deleteItem, getSingleList, listItemType, updateItem } from "../services/api";
+import { completeListType, deleteItem, getSingleList, simplifiedListItemType, updateItem } from "../services/api";
 import { UserContext } from "../App";
 import { Icons, buttonStyle } from "../helpers";
 
@@ -39,7 +39,7 @@ const style = {
 
 const EditList = () => {
   const [listInEdit, setListInEdit] = useState<completeListType | null>(null);
-  const [itemInEdit, setItemInEdit] = useState<listItemType | null>(null);
+  const [itemInEdit, setItemInEdit] = useState<simplifiedListItemType | null>(null);
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
   const searchTitle = useRef<HTMLInputElement | null>(null);
@@ -77,7 +77,7 @@ const EditList = () => {
     setChosenItem(item);
   };
 
-  const listItemTypeFormatter = (item: listItemType) => {
+  const listItemTypeFormatter = (item: simplifiedListItemType) => {
     return {
       id: item.id,
       externalApiIdentifier: item.externalApiIdentifier,
@@ -91,7 +91,7 @@ const EditList = () => {
 
   const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (chosenItem !== null) {
-      const newItem: listItemType = {
+      const newItem: simplifiedListItemType = {
         id: itemInEdit!.id,
         externalApiIdentifier: String(chosenItem.id),
         imageUrl: chosenItem.poster_path,

@@ -6,7 +6,7 @@ import {
   completeListType,
   searchUserById,
   userPublishedLists,
-  createUserType,
+  postUserType,
   followUser,
   unfollowUser,
 } from "../services/api";
@@ -17,7 +17,7 @@ const SHOWN_ITEMS_PER_LIST: number = 3;
 
 export const UserPublicProfile = () => {
   const { id } = useParams();
-  const [searchedUser, setSearchedUser] = useState<createUserType>();
+  const [searchedUser, setSearchedUser] = useState<postUserType>();
   const [searchedUserLists, setSearchedUserLists] = useState<Array<completeListType>>([]);
   const [following, setFollowing] = useState(false);
 

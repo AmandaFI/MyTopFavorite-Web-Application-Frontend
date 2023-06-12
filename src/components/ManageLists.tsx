@@ -15,7 +15,15 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { NewListContext, UserContext } from "../App";
-import { categoryType, deleteList, listType, userLists, allCategories, createList } from "../services/api";
+import {
+  categoryType,
+  deleteList,
+  simplifiedListType,
+  userLists,
+  allCategories,
+  postListType,
+  createList,
+} from "../services/api";
 
 const style = {
   position: "absolute" as "absolute",
@@ -29,7 +37,7 @@ const style = {
 };
 
 const ManageLists = () => {
-  const [loggedUserLists, setLoggedUserLists] = useState<Array<listType>>([]);
+  const [loggedUserLists, setLoggedUserLists] = useState<Array<simplifiedListType>>([]);
   const [openNewListForm, setOpenNewListForm] = useState(false);
   const [categories, setCategories] = useState<Array<categoryType>>([]);
   const [listTitle, setListTitle] = useState("");

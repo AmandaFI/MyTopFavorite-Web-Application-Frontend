@@ -5,7 +5,7 @@ import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import CreateListArea from "./components/CreateList";
 import EditList from "./components/EditList";
-import { listType, userType, loginStatus } from "./services/api";
+import { simplifiedListType, userType, loginStatus } from "./services/api";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import { Box, Stack } from "@mui/material";
@@ -15,7 +15,7 @@ import { createContext } from "react";
 import { UserPublicProfile } from "./components/UserPublicProfile";
 
 export const UserContext = createContext<userType | null>(null);
-export const NewListContext = createContext<listType | null>(null);
+export const NewListContext = createContext<simplifiedListType | null>(null);
 
 export const App = () => {
   const [loggedUser, setLoggedUser] = useState<userType | null>(null);

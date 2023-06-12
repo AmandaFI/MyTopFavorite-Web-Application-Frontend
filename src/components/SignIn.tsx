@@ -12,7 +12,7 @@ import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 import { useState } from "react";
-import { authenticationType, userType, login } from "../services/api";
+import { authenticateUserType, userType, login } from "../services/api";
 
 type signInProps = {
   setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
@@ -34,7 +34,7 @@ export default function SignIn(props: signInProps) {
   const [password, setPassword] = useState("");
   const [submitButtonInactive, setSubmitButtonInactive] = useState(false);
 
-  const authenticateUser = (credentials: authenticationType) => {
+  const authenticateUser = (credentials: authenticateUserType) => {
     login(credentials)
       .then((response) => {
         props.setLoggedUser(response.data);

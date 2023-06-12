@@ -1,10 +1,8 @@
 import axios from "axios";
 
-export type authenticationType = {
-  email: string;
-  password: string;
-};
+// Utility Types --> https://www.typescriptlang.org/docs/handbook/utility-types.html#handbook-content
 
+// ------------------- User
 export type userType = {
   id: number;
   name: string;
@@ -15,107 +13,105 @@ export type userType = {
   createdAt: string;
 };
 
-export type createUserType = {
+export type postUserType = {
   email: string;
-  encryptedPassword: string;
+  password: string;
   name: string;
 };
 
-export interface postListItemType {
+export type authenticateUserType = Omit<postUserType, "name">;
+
+// ------------------- ListItem
+export type completeListItemType = {
+  id: number;
   externalApiIdentifier: string;
   imageUrl?: string | null;
   details?: string | null;
   rank: number;
   title: string;
   userComment: string;
-}
+  list: simplifiedListType;
+};
 
-export interface listItemType extends postListItemType {
-  id: number;
-}
+// Omit<Type, Keys> cria um tipo com todas as properties do Type passado, exceto as properties indicadas em Keys
+export type simplifiedListItemType = Omit<completeListItemType, "list">;
+export type postListItemType = Omit<completeListItemType, "id" | "list">;
 
-export interface listItemApiResponse extends postListItemType {
-  id: number;
-  list: listType;
-}
-
+// ------------------- Category
 export type categoryType = {
   id: number;
   name: string;
 };
 
-export type listType = {
-  id: number;
-  title: string;
-  likersCount: number;
-  itemsCount: number;
-  createdAt: string;
-  category: categoryType;
-  draft: boolean;
-};
-
+// ------------------- List
 export type completeListType = {
   id: number;
   title: string;
   likersCount: number;
   category: categoryType;
+  draft: boolean;
+  createdAt: string;
+  itemsCount?: number;
   user: userType;
-  items: Array<listItemType>;
+  items: Array<simplifiedListItemType>;
   shownItems?: number;
 };
 
-export type createList = {
-  title: string;
-  categoryId: number;
-};
+export type simplifiedListType = Omit<completeListType, "user" | "items" | "shownItems">;
 
-export type updateList = {
-  title?: string;
-  draft?: boolean;
-};
+// Pick<Type, Keys> cria um tipo com somente as properties de Type indicadas em Keys
+export type postListType = Pick<completeListType, "title" | "category">;
 
+// Partial<Type> cria um tipo com todas as properties de Type sendo opcionais
+export type putListType = Pick<Partial<completeListType>, "title" | "draft">;
+
+// ------------------- Axios Requests
 axios.defaults.withCredentials = true;
 // axios.defaults.baseURL = 'http://localhost:3000/api/'
 axios.defaults.baseURL = "http://mytopfavorite.com:3000/api/";
 
 // ----- Session
-export const login = (info: authenticationType) => axios.post<userType>("/sessions", info);
+export const login = (info: authenticateUserType) => axios.post<userType>("/sessions", info);
 export const logout = () => axios.delete("/sessions");
 export const loginStatus = () => axios.get<userType>("/sessions/status");
 
 // ----- User
-export const createUser = (newUser: createUserType) => axios.post<userType>("/users", newUser);
+export const createUser = (newUser: postUserType) => axios.post<userType>("/users", newUser);
 export const initialLoadFeed = () => axios.get<Array<completeListType>>("/users/followed_users_lists");
 export const paginationLoadFeed = (pageNumber: number) =>
   axios.get<Array<completeListType>>(`/users/followed_users_lists?page=${pageNumber}&per_page=1`);
-export const searchUserById = (id: number) => axios.get<createUserType>(`/users/${id}`);
-export const searchUsersByName = (name: string) => axios.post<Array<createUserType>>("/users/find_users", { name });
+export const searchUserById = (id: number) => axios.get<postUserType>(`/users/${id}`);
+export const searchUsersByName = (name: string) => axios.post<Array<userType>>("/users/find_users", { name });
 export const followUser = (user_id: number) => axios.post<userType>("/users/follow", { user_id });
 export const unfollowUser = (user_id: number) => axios.delete("/users/unfollow", { data: { user_id } });
 
 // ----- List
-export const userLists = (id: number) => axios.get<Array<listType>>("/lists", { params: { id } });
-export const userDrafLists = (id: number) => axios.get<Array<listType>>("/lists/draft_lists", { params: { id } });
+export const userLists = (id: number) => axios.get<Array<simplifiedListType>>("/lists", { params: { id } });
+export const userDrafLists = (id: number) =>
+  axios.get<Array<simplifiedListType>>("/lists/draft_lists", { params: { id } });
 
 export const userPublishedLists = (id: number, complete_and_paginated: boolean) =>
-  axios.get<Array<listType | completeListType>>("/lists/published_lists", { params: { id, complete_and_paginated } });
+  axios.get<Array<simplifiedListType | completeListType>>("/lists/published_lists", {
+    params: { id, complete_and_paginated },
+  });
 export const userPublishedListsPaginated = (id: number, complete_and_paginated: boolean, page: number) =>
   axios.get<Array<completeListType>>("/lists/published_lists", {
     params: { id, complete_and_paginated, page, per_page: 2 },
   });
 
-export const deleteList = (listId: number) => axios.delete<Array<listType>>(`/lists/${listId}`);
+export const deleteList = (listId: number) => axios.delete<Array<simplifiedListType>>(`/lists/${listId}`);
 export const createList = (title: string, category_id: number) =>
-  axios.post<listType>("/lists", { title, category_id });
+  axios.post<simplifiedListType>("/lists", { title, category_id });
 export const likeList = (id: number) => axios.post<userType>(`/lists/${id}/like`);
 export const getSingleList = (id: number) => axios.get<completeListType>(`/lists/${id}`);
-export const updateList = (id: number, list: updateList) => axios.put<listType>(`/lists/${id}`, list);
+export const updateList = (id: number, list: putListType) => axios.put<simplifiedListType>(`/lists/${id}`, list);
 
 // ----- Category
 export const allCategories = () => axios.get<Array<categoryType>>("/categories");
 
 // ----- ListItem
 export const insertItem = (listId: number, item: postListItemType) =>
-  axios.post<listItemApiResponse>("/list_items", { listId, ...item });
-export const updateItem = (item: listItemType) => axios.put<listItemApiResponse>(`/list_items/${item.id}`, item);
+  axios.post<completeListItemType>("/list_items", { listId, ...item });
+export const updateItem = (item: simplifiedListItemType) =>
+  axios.put<completeListItemType>(`/list_items/${item.id}`, item);
 export const deleteItem = (itemId: number) => axios.delete(`/list_items/${itemId}`);
