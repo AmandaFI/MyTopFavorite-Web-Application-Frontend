@@ -1,23 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as React from "react";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import CreateListArea from "./components/CreateList";
 import EditList from "./components/EditList";
-import { listType, loggedUserType, loginStatus } from "./services/api";
+import { listType, userType, loginStatus } from "./services/api";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import { Box, Stack } from "@mui/material";
 import Feed from "./components/Feed";
 import ManageLists from "./components/ManageLists";
-import { createContext, useContext } from "react";
+import { createContext } from "react";
+import { UserPublicProfile } from "./components/UserPublicProfile";
 
-export const UserContext = createContext<loggedUserType | null>(null);
+export const UserContext = createContext<userType | null>(null);
 export const NewListContext = createContext<listType | null>(null);
 
 export const App = () => {
-  const [loggedUser, setLoggedUser] = useState<loggedUserType | null>(null);
+  const [loggedUser, setLoggedUser] = useState<userType | null>(null);
   const [signUp, setSignUp] = useState(false);
 
   React.useEffect(() => {
@@ -40,6 +41,7 @@ export const App = () => {
               <Route path="/manage-lists" element={<ManageLists />} />
               <Route path="/create-list/:id" element={<CreateListArea />} />
               <Route path="/edit-list/:id" element={<EditList />} />
+              <Route path="/user-profile/:id" element={<UserPublicProfile />} />
             </Routes>
           </Stack>
         </Box>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Box, Stack } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { styled } from "@mui/system";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
@@ -33,6 +33,7 @@ import {
   updateItem,
   updateList,
 } from "../services/api";
+import { Icons, buttonStyle } from "../helpers";
 
 const style = {
   position: "absolute" as "absolute",
@@ -44,17 +45,6 @@ const style = {
   borderRadius: "5px",
   p: 4,
 };
-
-const buttonStyle = {
-  bgcolor: theme.palette.secondary.main,
-  color: "white",
-  mr: 1,
-};
-
-const Icons = styled(Box)(() => ({
-  display: "flex",
-  justifyContent: "space-between",
-}));
 
 const CreateListArea = () => {
   const [list, setList] = useState<completeListType | null>(null);
@@ -73,11 +63,12 @@ const CreateListArea = () => {
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [apiResults, setApiResults] = useState<responseResultType[]>([]);
 
-  const [replaceItemId, setReplaceItemId] = useState<number | null>(null);
-  const [itemInEdit, setItemInEdit] = useState<listItemType | null>(null);
+  const [itemToBeReplaced, setItemToBeReplaced] = useState<number | null>(null);
+  const [itemBeingEdited, setItemBeingEdited] = useState<listItemType | null>(null);
   const [rankCount, setRankCount] = useState(0);
 
   const loggedUser = useContext(UserContext);
+  const navigate = useNavigate();
 
   // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
   const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -138,7 +129,7 @@ const CreateListArea = () => {
       chosenItem as responseResultType,
       chosenItemUsertext!.current!.value
     );
-    if (replaceItemId === null) {
+    if (itemToBeReplaced === null) {
       insertItem(Number(list?.id), newItem)
         .then((response) => {
           const addedItem = listItemTypeFormatter(response.data);
@@ -149,13 +140,13 @@ const CreateListArea = () => {
         })
         .catch((error) => console.log(error));
     } else {
-      updateItem({ id: replaceItemId, ...newItem })
+      updateItem({ id: itemToBeReplaced, ...newItem })
         .then((response) => {
           const replacedItem = listItemTypeFormatter(response.data);
           setAddedItems((previousItems) =>
             previousItems.map((item) => (item.id === replacedItem.id ? replacedItem : item))
           );
-          setReplaceItemId(null);
+          setItemToBeReplaced(null);
           setOpenSearchItemModal(false);
         })
         .catch((error) => console.log(error));
@@ -163,7 +154,7 @@ const CreateListArea = () => {
   };
 
   const handleReplaceItemOnClick = (replaceItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setReplaceItemId(replaceItemId);
+    setItemToBeReplaced(replaceItemId);
     setOpenSearchItemModal(true);
   };
 
@@ -177,33 +168,33 @@ const CreateListArea = () => {
 
   const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const editedItem = {
-      ...itemInEdit!,
+      ...itemBeingEdited!,
       userComment: e.target.value,
     };
-    setItemInEdit(editedItem);
+    setItemBeingEdited(editedItem);
   };
 
   const handleSaveItemEditedOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    updateItem(itemInEdit!)
+    updateItem(itemBeingEdited!)
       .then((response) => {
         const editedItem = listItemTypeFormatter(response.data);
         setAddedItems((previousItems) =>
           previousItems.map((item) =>
-            item.externalApiIdentifier === itemInEdit?.externalApiIdentifier ? editedItem : item
+            item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier ? editedItem : item
           )
         );
-        setItemInEdit(null);
+        setItemBeingEdited(null);
       })
       .catch((error) => console.log(error));
   };
 
-  // VERIFICAR SITUACAO SE ESTA ATUALIZANDO OU NAO, VER QUESTAO DA API RECEBER TYUPE ANY
   const handlePublishListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    updateList({ id: list!.id, draft: true })
+    updateList(list!.id, { draft: false })
       .then((_response) => {
         setList((previousList) => {
           return { ...previousList!, draft: true };
         });
+        navigate("/manage-lists");
       })
       .catch((error) => console.log(error));
   };
@@ -230,7 +221,7 @@ const CreateListArea = () => {
 
                 <CardContent>
                   {addedItems.map((item, index) => {
-                    if (item.externalApiIdentifier === itemInEdit?.externalApiIdentifier)
+                    if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
                       return (
                         <Card sx={{ display: "flex", mb: 2 }} key={index}>
                           <Box
@@ -259,7 +250,7 @@ const CreateListArea = () => {
                                   id="outlined-multiline-static"
                                   multiline
                                   rows={4}
-                                  value={itemInEdit!.userComment}
+                                  value={itemBeingEdited!.userComment}
                                   onChange={handleUserCommentOnChange}
                                 />
                                 <Stack direction="row">
@@ -279,7 +270,7 @@ const CreateListArea = () => {
                                       bgcolor: theme.palette.secondary.main,
                                       color: "white",
                                     }}
-                                    onClick={(_e) => setItemInEdit(null)}
+                                    onClick={() => setItemBeingEdited(null)}
                                   >
                                     Cancelar
                                   </Button>
@@ -327,7 +318,7 @@ const CreateListArea = () => {
                                     bgcolor: theme.palette.secondary.main,
                                     color: "white",
                                   }}
-                                  onClick={(_e) => setItemInEdit(item)}
+                                  onClick={(_e) => setItemBeingEdited(item)}
                                 >
                                   Editar
                                 </Button>
@@ -366,14 +357,16 @@ const CreateListArea = () => {
                 </CardContent>
               </Card>
               <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                <Button sx={buttonStyle} onClick={(_e) => setOpenSearchItemModal(true)}>
+                <Button sx={buttonStyle} onClick={() => setOpenSearchItemModal(true)}>
                   Adicionar
                 </Button>
                 <Button sx={buttonStyle} onClick={handlePublishListOnClick}>
                   Publicar
                 </Button>
                 <Link to="/manage-lists" style={{ textDecoration: "none", color: "black" }}>
-                  <Button sx={buttonStyle}>Cancelar</Button>
+                  <Button sx={buttonStyle} onClick={() => navigate("/manage-lists")}>
+                    Voltar
+                  </Button>
                 </Link>
               </Box>
             </Stack>

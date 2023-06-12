@@ -13,7 +13,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { createUser, userType } from "../services/api";
+import { createUser, createUserType } from "../services/api";
 
 const Copyright = (props: any) => {
   return (
@@ -43,7 +43,7 @@ export default function SignUp(props: signUpPorpsType) {
     } else window.alert("Campos obrigatórios precisam ser preenchidos.");
   };
 
-  const newUser = (user: userType) => {
+  const newUser = (user: createUserType) => {
     createUser(user)
       .then((_user) => props.setSignUp(false))
       .catch((error) => {

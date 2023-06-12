@@ -36,9 +36,10 @@ const ManageLists = () => {
   const [listCategory, setListCategory] = useState<categoryType>({ id: -1, name: "" });
 
   const navigate = useNavigate();
+  const loggedUser = useContext(UserContext);
 
   useEffect(() => {
-    userLists()
+    userLists(loggedUser!.id)
       .then((response) => setLoggedUserLists(response.data))
       .catch((error) => console.log(error));
 
@@ -49,8 +50,6 @@ const ManageLists = () => {
       })
       .catch((error) => console.log(error));
   }, []);
-
-  const loggedUser = useContext(UserContext);
 
   const handleDeleteListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     deleteList(listId)

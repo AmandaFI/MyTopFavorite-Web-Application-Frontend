@@ -16,16 +16,14 @@ COMPONENTS
 
 
 FUNCIONALIDADES
-
--- Exibir somente 3 itens das listas nos feeds e botão ver mais carrega o restante
 -- Ao clicar em um card de uma lista no feed, ser possível ler mais informações sobre o item
 -- Ao clicar no em uma lista, abri-la inteira em outra página
+-- Botão para editar titulo da lista
+-- Separar listas postadas de não postadas usando tabs
+-- Mudar barra de busca para combobox server side load
 
 PROBLEMAS ATUAIS
 
-- Refresh na create area perde o titulo e categoria da lista
 - Depois de um like, indicar que a lista já foi liked e mudar o botão para dislike
 - Drag and drop para editar ordem dos itens na lista ( edição e criação ) só funciona com o StrictMode desligado
-- Salvar itens da lista em batches (mexer no rails)
-- Salvar e ediar o metadata dos listItems
 - Corrigir numeração dos itens da lsita durante a edição da mesma

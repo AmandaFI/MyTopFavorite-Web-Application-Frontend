@@ -13,6 +13,7 @@ import Button from "@mui/material/Button";
 import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from "../services/api";
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
+import { Icons } from "../helpers";
 
 export type ListMovieType = {
   id: number;
@@ -22,11 +23,6 @@ export type ListMovieType = {
   extraInfo: string;
   posterUrl: string;
 };
-
-const Icons = styled(Box)(() => ({
-  display: "flex",
-  justifyContent: "space-between",
-}));
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 

@@ -24,17 +24,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import { completeListType, deleteItem, getSingleList, listItemType, updateItem } from "../services/api";
 import { UserContext } from "../App";
-
-const Icons = styled(Box)(() => ({
-  display: "flex",
-  justifyContent: "space-between",
-}));
-
-const buttonStyle = {
-  bgcolor: theme.palette.secondary.main,
-  color: "white",
-  mr: 1,
-};
+import { Icons, buttonStyle } from "../helpers";
 
 const style = {
   position: "absolute" as "absolute",
@@ -348,7 +338,7 @@ const EditList = () => {
                       sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
                       onClick={(e) => navigate("/manage-lists")}
                     >
-                      Cancelar
+                      Voltar
                     </Button>
                   </Link>
                 </CardActions>

@@ -12,10 +12,10 @@ import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 import { useState } from "react";
-import { authenticationType, loggedUserType, login } from "../services/api";
+import { authenticationType, userType, login } from "../services/api";
 
 type signInProps = {
-  setLoggedUser: React.Dispatch<React.SetStateAction<loggedUserType | null>>;
+  setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
