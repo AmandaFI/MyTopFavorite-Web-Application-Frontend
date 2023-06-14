@@ -1,18 +1,17 @@
-import { useState } from "react";
+import { useState, createContext } from "react";
 import * as React from "react";
 import { Routes, Route } from "react-router-dom";
+import { simplifiedListType, userType, loginStatus } from "./services/api";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import CreateListArea from "./components/CreateList";
 import EditList from "./components/EditList";
-import { simplifiedListType, userType, loginStatus } from "./services/api";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import { Box, Stack } from "@mui/material";
 import Feed from "./components/Feed";
 import ManageLists from "./components/ManageLists";
-import { createContext } from "react";
 import { UserPublicProfile } from "./components/UserPublicProfile";
+import { Box, Stack } from "@mui/material";
 
 export const UserContext = createContext<userType | null>(null);
 export const NewListContext = createContext<simplifiedListType | null>(null);
@@ -22,7 +21,7 @@ export const App = () => {
   const [signUp, setSignUp] = useState(false);
 
   React.useEffect(() => {
-    loginStatus().then((r) => setLoggedUser(r.data));
+    loginStatus().then((response) => setLoggedUser(response.data));
   }, []);
 
   if (signUp) return <SignUp {...{ setSignUp }} />;

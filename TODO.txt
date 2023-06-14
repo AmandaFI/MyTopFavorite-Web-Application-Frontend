@@ -1,13 +1,18 @@
+AGORA
+-- Separar listas postadas de não postadas usando tabs
+-- Botão para editar titulo da lista
+-- Exibir quantidades de likes no botão like
+-- Melhorar apresentação das informações na sidebar
+-- Exibir resultados da busca do tmdb em tabela e não lista
+
+
 DESIGN:
 
 -- Estilzar botões
 -- Espaçar e alinahr botões em manage list e create area
 -- Considerar colocar icones em alguns botões
--- Exibir resultados da busca do tmdb em tabela e não lista
 -- Incluindo o poster do filme na tabela
--- Melhorar apresentação das informações na sidebar
 -- Alguns botões somem no hover (cor igual a cor de fundo e texto)
--- Exibir quantidades de likes no botão like
 -- Diminuir largura dos posts no feed ? (e na pagina de um usuario buscado)
 
 
@@ -18,8 +23,6 @@ COMPONENTS
 FUNCIONALIDADES
 -- Ao clicar em um card de uma lista no feed, ser possível ler mais informações sobre o item
 -- Ao clicar no em uma lista, abri-la inteira em outra página
--- Botão para editar titulo da lista
--- Separar listas postadas de não postadas usando tabs
 -- Paginar itens da lista, ao clicar em ver mais exibir alguns items não todos
 
 

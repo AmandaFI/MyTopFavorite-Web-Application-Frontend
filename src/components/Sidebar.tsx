@@ -13,14 +13,8 @@ import PeopleIcon from "@mui/icons-material/People";
 import EventIcon from "@mui/icons-material/Event";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import { UserContext, userViewType } from "../App";
+import { UserContext } from "../App";
 import { Link } from "react-router-dom";
-
-export type sidebarVersionType = "userInfo" | "createList" | "searchUser";
-
-export type sidebarPropsType = {
-  setCurrentUserView: React.Dispatch<React.SetStateAction<userViewType>>;
-};
 
 const Sidebar = () => {
   const loggedUser = useContext(UserContext);

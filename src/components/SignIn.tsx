@@ -1,4 +1,7 @@
 import * as React from "react";
+import theme from "../theme";
+import { useState } from "react";
+import { authenticateUserType, userType, login } from "../services/api";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -10,9 +13,6 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "../theme";
-import { useState } from "react";
-import { authenticateUserType, userType, login } from "../services/api";
 
 type signInProps = {
   setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;

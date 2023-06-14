@@ -4,7 +4,7 @@ import theme from "../theme";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
 import { completeListType, deleteItem, getSingleList, simplifiedListItemType, updateItem } from "../services/api";
 import { UserContext } from "../App";
-import { Icons, buttonStyle } from "../styleHelpers";
+import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
 import { Box, Stack, TextField } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -323,7 +323,7 @@ const EditList = () => {
                     <Button
                       size="small"
                       sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
-                      onClick={(e) => navigate("/manage-lists")}
+                      onClick={(_e) => navigate("/manage-lists")}
                     >
                       Voltar
                     </Button>
@@ -337,7 +337,7 @@ const EditList = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <Box sx={searchItemsBoxStyle} component="form">
+            <Box sx={modalBoxStyle} component="form">
               <Stack direction="column" display={"flex"} spacing={2}>
                 <Typography variant="h5" component="div">
                   Adicione um novo item!

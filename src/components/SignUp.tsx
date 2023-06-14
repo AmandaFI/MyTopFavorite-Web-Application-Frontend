@@ -1,10 +1,9 @@
 import * as React from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import theme from "../theme";
+import { createUser, postUserType } from "../services/api";
 import { ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import { Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -13,7 +12,6 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { createUser, postUserType } from "../services/api";
 
 const Copyright = (props: any) => {
   return (
@@ -39,14 +37,14 @@ export default function SignUp(props: signUpPorpsType) {
     event.preventDefault(); // trocar get para post
     if (email.trim() !== "" && password.trim() !== "" && name !== "") {
       setSubmitButtonState(true);
-      newUser({ email, encryptedPassword: password, name });
+      newUser({ email, password, name });
     } else window.alert("Campos obrigatórios precisam ser preenchidos.");
   };
 
   const newUser = (user: postUserType) => {
     createUser(user)
       .then((_user) => props.setSignUp(false))
-      .catch((error) => {
+      .catch((_error) => {
         setSubmitButtonState(false);
       });
   };

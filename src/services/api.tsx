@@ -83,21 +83,17 @@ export const paginationLoadFeed = (pageNumber: number) =>
 export const searchUserById = (id: number) => axios.get<postUserType>(`/users/${id}`);
 export const searchUsersByName = (name: string) => axios.post<Array<userType>>("/users/find_users", { name });
 export const followUser = (user_id: number) => axios.post<userType>("/users/follow", { user_id });
-export const unfollowUser = (user_id: number) => axios.delete("/users/unfollow", { data: { user_id } });
+export const unfollowUser = (user_id: number) => axios.delete(`/users/unfollow?user_id=${user_id}`);
 
 // ----- List
-export const userLists = (id: number) => axios.get<Array<simplifiedListType>>("/lists", { params: { id } });
+export const userLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists/${id}`);
 export const userDrafLists = (id: number) =>
-  axios.get<Array<simplifiedListType>>("/lists/draft_lists", { params: { id } });
+  axios.get<Array<simplifiedListType>>("/lists/draft_lists", { params: { id } }); // somente user pode ver suas drafted lists
 
-export const userPublishedLists = (id: number, complete_and_paginated: boolean) =>
-  axios.get<Array<simplifiedListType | completeListType>>("/lists/published_lists", {
-    params: { id, complete_and_paginated },
-  });
-export const userPublishedListsPaginated = (id: number, complete_and_paginated: boolean, page: number) =>
-  axios.get<Array<completeListType>>("/lists/published_lists", {
-    params: { id, complete_and_paginated, page, per_page: 2 },
-  });
+export const userPublishedLists = (id: number) =>
+  axios.get<Array<simplifiedListType | completeListType>>(`/lists/${id}/published_lists`);
+export const userPublishedListsPaginated = (id: number, page: number) =>
+  axios.get<Array<completeListType>>(`/lists/${id}/published_lists?page=${page}&per_page=2`);
 
 export const deleteList = (listId: number) => axios.delete<Array<simplifiedListType>>(`/lists/${listId}`);
 export const createList = (title: string, category_id: number) =>

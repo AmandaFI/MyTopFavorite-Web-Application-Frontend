@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import { Box, Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { styled } from "@mui/system";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
 import Container from "@mui/material/Container";
 import theme from "../theme";
