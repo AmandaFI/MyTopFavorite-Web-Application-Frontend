@@ -16,6 +16,8 @@ import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import {
   categoryType,
   deleteList,
@@ -24,6 +26,8 @@ import {
   allCategories,
   postListType,
   createList,
+  userDrafLists,
+  userPublishedLists,
 } from "../services/api";
 
 const ManageLists = () => {
@@ -31,14 +35,37 @@ const ManageLists = () => {
   const loggedUser = useContext(UserContext);
 
   const [loggedUserLists, setLoggedUserLists] = useState<Array<simplifiedListType>>([]);
+  const [loggedUserDraftLists, setLoggedUserDrafLists] = useState<Array<simplifiedListType>>([]);
+  const [loggedUserPublishedLists, setLoggedUserPublishedLists] = useState<Array<simplifiedListType>>([]);
+
   const [openNewListForm, setOpenNewListForm] = useState(false);
   const [categories, setCategories] = useState<Array<categoryType>>([]);
   const [listTitle, setListTitle] = useState("");
   const [listCategory, setListCategory] = useState<categoryType>({ id: -1, name: "" });
 
+  type tabs = "published" | "draft";
+  const [currentTab, setCurrentTab] = React.useState<tabs>("published");
+
   useEffect(() => {
-    userLists(loggedUser!.id)
-      .then((response) => setLoggedUserLists(response.data))
+    // userLists(loggedUser!.id)
+    //   .then((response) => {
+    //     setLoggedUserLists(response.data);
+    //     console.log(response.data);
+    //   })
+    //   .catch((error) => console.log(error));
+
+    userDrafLists(loggedUser!.id)
+      .then((response) => {
+        setLoggedUserDrafLists(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => console.log(error));
+
+    userPublishedLists(loggedUser!.id)
+      .then((response) => {
+        setLoggedUserPublishedLists(response.data);
+        console.log(response.data);
+      })
       .catch((error) => console.log(error));
 
     allCategories()
@@ -62,8 +89,50 @@ const ManageLists = () => {
   };
 
   let userListCards;
-  if (loggedUserLists !== null) {
-    userListCards = loggedUserLists.map((card) => (
+  if (loggedUserLists !== null && currentTab === "published") {
+    userListCards = loggedUserPublishedLists.map((card) => (
+      <Card
+        sx={{
+          minWidth: 275,
+          maxWidth: 200,
+          m: 1,
+          minHeight: 250,
+          maxHeight: "50%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        key={card.id}
+      >
+        <CardContent>
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            {card.category.name}
+          </Typography>
+          <Typography variant="h5" component="div">
+            {card.title}
+          </Typography>
+          <Typography sx={{ mb: 1 }} color="text.secondary">
+            {card.createdAt.split(":")[0].split("T")[0]}
+          </Typography>
+          <Typography sx={{ mb: 1 }} color="text.secondary">
+            {card.draft ? "Não publicada" : "Publicada"}
+          </Typography>
+        </CardContent>
+        <CardActions disableSpacing sx={{ mt: "auto", display: "flex" }}>
+          <Stack direction="row" display="flex" justifyContent="end">
+            <Link to={`/edit-list/${card.id}`} style={{ textDecoration: "none", color: "white" }}>
+              <Button size="small" onClick={handleEditListOnClick(card.id)}>
+                Editar
+              </Button>
+            </Link>
+            <Button size="small" onClick={handleDeleteListOnClick(card.id)}>
+              Deletar
+            </Button>
+          </Stack>
+        </CardActions>
+      </Card>
+    ));
+  } else if (loggedUserLists !== null && currentTab === "draft") {
+    userListCards = loggedUserDraftLists.map((card) => (
       <Card
         sx={{
           minWidth: 275,
@@ -124,6 +193,10 @@ const ManageLists = () => {
       .catch((error) => console.log(error));
   };
 
+  const handleTabOnChange = (_e: React.SyntheticEvent, newTab: tabs) => {
+    setCurrentTab(newTab);
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", flex: 10 }}>
@@ -151,14 +224,44 @@ const ManageLists = () => {
               flexWrap: "wrap",
             }}
           >
-            <Card sx={{ minWidth: 275, m: 1, maxHeight: "50%", minHeight: 250 }}>
-              <CardContent sx={{ mb: 6 }}>
-                <IconButton size="large" onClick={(_e) => setOpenNewListForm(true)}>
-                  <AddCircleOutlineIcon fontSize="large" sx={{ mr: 1 }} />
-                  Nova Lista
-                </IconButton>
-              </CardContent>
-            </Card>
+            <Stack>
+              <Tabs
+                value={currentTab}
+                onChange={handleTabOnChange}
+                textColor="inherit"
+                // indicatorColor="primary"
+                aria-label="secondary tabs example"
+                TabIndicatorProps={{
+                  style: {
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                  },
+                }}
+              >
+                <Tab value="published" label="Piblicadas" />
+                <Tab value="draft" label="Não Publicadas" />
+              </Tabs>
+              <Box
+                sx={{
+                  display: "flex",
+                  flex: 8,
+                  p: 1,
+                  bgcolor: theme.palette.primary.dark,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Card sx={{ minWidth: 275, m: 1, maxHeight: "50%", minHeight: 250 }}>
+                  <CardContent sx={{ mb: 6 }}>
+                    <IconButton size="large" onClick={(_e) => setOpenNewListForm(true)}>
+                      <AddCircleOutlineIcon fontSize="large" sx={{ mr: 1 }} />
+                      Nova Lista
+                    </IconButton>
+                  </CardContent>
+                </Card>
+                {userListCards}
+              </Box>
+            </Stack>
+
             <Modal
               open={openNewListForm}
               aria-labelledby="modal-modal-title"
@@ -218,7 +321,6 @@ const ManageLists = () => {
                 </Stack>
               </Box>
             </Modal>
-            {userListCards}
           </Box>
         </Stack>
       </Box>

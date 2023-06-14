@@ -4,7 +4,7 @@ import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from 
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons } from "../styleHelpers";
-import { Box, Stack } from "@mui/material";
+import { Box, Container, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -69,69 +69,71 @@ const Feed = () => {
   };
 
   return (
-    <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
-      {feedContent.map((list, listIndex) => (
-        <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
-          <Icons>
-            <Box>
-              <Avatar sx={{ mt: 2, ml: 2 }}>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
-              <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
-            </Box>
-            <Typography variant="h5" m={2}>
-              {list.title}
-            </Typography>
-            <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
-              {list.category.name}
-            </Box>
-          </Icons>
+    <Box flex={10} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
+      <Container maxWidth="lg">
+        {feedContent.map((list, listIndex) => (
+          <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
+            <Icons>
+              <Box>
+                <Avatar sx={{ mt: 2, ml: 2 }}>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
+                <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
+              </Box>
+              <Typography variant="h5" m={2}>
+                {list.title}
+              </Typography>
+              <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
+                {list.category.name}
+              </Box>
+            </Icons>
 
-          <CardContent>
-            {list.items.slice(0, list.shownItems!).map((item) => (
-              <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
-                <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
-                  <CardContent sx={{ flex: "1 0 auto" }}>
-                    <Stack direction="row" spacing={2}>
-                      <Typography component="div" variant="h3">
-                        {item.rank}
-                      </Typography>
-                      <Stack direction="column">
-                        <Typography component="div" variant="h5">
-                          {item.title}
+            <CardContent>
+              {list.items.slice(0, list.shownItems!).map((item) => (
+                <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
+                  <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+                    <CardContent sx={{ flex: "1 0 auto" }}>
+                      <Stack direction="row" spacing={2}>
+                        <Typography component="div" variant="h3">
+                          {item.rank}
                         </Typography>
-                        <Typography variant="subtitle1" color="text.secondary" component="div">
-                          {item.details}
-                        </Typography>
+                        <Stack direction="column">
+                          <Typography component="div" variant="h5">
+                            {item.title}
+                          </Typography>
+                          <Typography variant="subtitle1" color="text.secondary" component="div">
+                            {item.details}
+                          </Typography>
+                        </Stack>
                       </Stack>
-                    </Stack>
-                    <Typography component="div">{item.userComment}</Typography>
-                  </CardContent>
-                </Box>
-                <CardMedia
-                  component="img"
-                  sx={{ width: 151, flex: 1 }}
-                  src={`${posterInitialUrl}${item.imageUrl}`}
-                  alt={item.title}
-                />
-              </Card>
-            ))}
-          </CardContent>
-          <CardActions>
-            <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
-              Like
-            </Button>
-            <Button size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
-              {list.items.length - 1 > list.shownItems!
-                ? "Ver mais"
-                : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST
-                ? ""
-                : "Ver menos"}
-            </Button>
-          </CardActions>
-        </Card>
-      ))}
-      <Button size="small" sx={{ color: "black" }} onClick={handleLoadMoreListsOnClick}>
-        Carregar mais
-      </Button>
+                      <Typography component="div">{item.userComment}</Typography>
+                    </CardContent>
+                  </Box>
+                  <CardMedia
+                    component="img"
+                    sx={{ width: 151, flex: 1 }}
+                    src={`${posterInitialUrl}${item.imageUrl}`}
+                    alt={item.title}
+                  />
+                </Card>
+              ))}
+            </CardContent>
+            <CardActions>
+              <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
+                Like
+              </Button>
+              <Button size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
+                {list.items.length - 1 > list.shownItems!
+                  ? "Ver mais"
+                  : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST
+                  ? ""
+                  : "Ver menos"}
+              </Button>
+            </CardActions>
+          </Card>
+        ))}
+        <Button size="small" sx={{ color: "black" }} onClick={handleLoadMoreListsOnClick}>
+          Carregar mais
+        </Button>
+      </Container>
     </Box>
   );
 };

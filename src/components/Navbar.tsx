@@ -77,7 +77,9 @@ const Navbar = (props: navbarPropsType) => {
   return (
     <AppBar position="sticky" sx={{ bgcolor: theme.palette.primary.main }}>
       <StyledToolbar>
-        <Typography variant="h6">My Top Favorite</Typography>
+        <Typography variant="h6" onClick={() => navigate("/feed")}>
+          My Top Favorite
+        </Typography>
         {/* <Search> */}
         {/* <InputBase placeholder="Procurar usuário" type="search"></InputBase> */}
         <Autocomplete

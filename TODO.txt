@@ -14,6 +14,7 @@ DESIGN:
 -- Incluindo o poster do filme na tabela
 -- Alguns botões somem no hover (cor igual a cor de fundo e texto)
 -- Diminuir largura dos posts no feed ? (e na pagina de um usuario buscado)
+-- mudar curosr ao clicar no logo 
 
 
 COMPONENTS 

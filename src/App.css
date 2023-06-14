@@ -1,3 +1,11 @@
+.Mui-selected {
+  color: #c3c3c3 !important;
+}
+
+.MuiTabs-indicator{
+  background: #c3c3c3 !important;
+}
+
 /* #root {
 	max-width: 1280px;
 	margin: 0 auto;

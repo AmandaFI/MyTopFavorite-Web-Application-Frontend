@@ -47,25 +47,25 @@ const Sidebar = () => {
               <ListItemIcon>
                 <EventIcon />
               </ListItemIcon>
-              <ListItemText primary={loggedUser!.createdAt.split(":")[0].split("T")[0]} />
+              <ListItemText primary={`Desde ${loggedUser!.createdAt.split(":")[0].split("T")[0]}`} />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
                 <FormatListNumberedIcon />
               </ListItemIcon>
-              <ListItemText primary={loggedUser!.listCount} />
+              <ListItemText primary={`${loggedUser!.listCount} Listas`} />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
                 <PeopleIcon />
               </ListItemIcon>
-              <ListItemText primary={loggedUser!.followersCount} />
+              <ListItemText primary={`${loggedUser!.followersCount} Seguidores `} />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
                 <PeopleIcon />
               </ListItemIcon>
-              <ListItemText primary={loggedUser!.followedUsersCount} />
+              <ListItemText primary={`${loggedUser!.followedUsersCount} Seguindo `} />
             </ListItem>
             <Divider sx={{ mt: 2 }}></Divider>
           </List>

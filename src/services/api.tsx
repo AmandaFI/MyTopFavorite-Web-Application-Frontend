@@ -86,9 +86,8 @@ export const followUser = (user_id: number) => axios.post<userType>("/users/foll
 export const unfollowUser = (user_id: number) => axios.delete(`/users/unfollow?user_id=${user_id}`);
 
 // ----- List
-export const userLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists/${id}`);
-export const userDrafLists = (id: number) =>
-  axios.get<Array<simplifiedListType>>("/lists/draft_lists", { params: { id } }); // somente user pode ver suas drafted lists
+export const userLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists?id=${id}`);
+export const userDrafLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists/${id}/draft_lists`); // somente user pode ver suas drafted lists
 
 export const userPublishedLists = (id: number) =>
   axios.get<Array<simplifiedListType | completeListType>>(`/lists/${id}/published_lists`);
