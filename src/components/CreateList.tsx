@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
-import { Box, Stack } from "@mui/material";
+import React, { useEffect, useState, useRef, useContext, SyntheticEvent } from "react";
+import { Box, Checkbox, CircularProgress, FormControlLabel, Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
 import Container from "@mui/material/Container";
 import theme from "../theme";
@@ -16,7 +15,7 @@ import Paper from "@mui/material/Paper";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Avatar from "@mui/material/Avatar";
+import AddIcon from "@mui/icons-material/Add";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -30,19 +29,38 @@ import {
   simplifiedListItemType,
   postListItemType,
   updateItem,
-  putListType,
   updateList,
 } from "../services/api";
 import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
 
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  pt: 2,
+  px: 4,
+  pb: 3,
+};
+
 const CreateListArea = () => {
   const [list, setList] = useState<completeListType | null>(null);
   const { id } = useParams();
+  const loggedUser = useContext(UserContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    getSingleList(Number(id))
-      .then((response) => setList(response.data))
-      .catch((error) => console.log(error));
+    if (id === undefined) navigate("/manage-lists");
+    else {
+      getSingleList(+id)
+        .then((response) => {
+          setList(response.data);
+          setTitleBeingEdited(response.data.title);
+        })
+        .catch((error) => console.log(error));
+    }
   }, []);
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
@@ -51,13 +69,13 @@ const CreateListArea = () => {
   const [chosenItem, setChosenItem] = useState<responseResultType | boolean>(false);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [apiResults, setApiResults] = useState<responseResultType[]>([]);
+  const [titleBeingEdited, setTitleBeingEdited] = useState("");
 
   const [itemToBeReplaced, setItemToBeReplaced] = useState<number | null>(null);
   const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
   const [rankCount, setRankCount] = useState(0);
-
-  const loggedUser = useContext(UserContext);
-  const navigate = useNavigate();
+  const [publishCheckBox, setPublishCheckBox] = useState(false);
+  const [openWarningModal, setOpenWarningModal] = useState(false);
 
   // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
   const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -177,240 +195,281 @@ const CreateListArea = () => {
       .catch((error) => console.log(error));
   };
 
-  const handlePublishListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    updateList(list!.id, { draft: false })
-      .then((_response) => {
-        setList((previousList) => {
-          return { ...previousList!, draft: true };
-        });
-        navigate("/manage-lists");
-      })
-      .catch((error) => console.log(error));
+  const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
+    if (addedItems.length < 3 && checked) {
+      setOpenWarningModal(true);
+    } else if (checked) {
+      updateList(list!.id, { draft: false })
+        .then((_response) => {
+          setList((previousList) => {
+            return { ...previousList!, draft: true };
+          });
+          setPublishCheckBox(true);
+        })
+        .catch((error) => console.log(error));
+    } else setPublishCheckBox(false);
   };
 
-  return (
-    <>
+  const handleListTitleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setTitleBeingEdited(event.target.value);
+  };
+
+  const handleTitleOnBlur = (_e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => {
+    updateList(list!.id, { title: titleBeingEdited });
+  };
+
+  if (list === null)
+    return (
       <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
         <Container maxWidth="md">
-          <Box sx={{ display: "flex" }}>
-            <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
-              <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
-                <Icons>
-                  <Box>
-                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser?.name[0]}${loggedUser!.name[1]}`}</Avatar>
-                    <Typography sx={{ ml: 2, mb: 2 }}>{loggedUser?.name}</Typography>
-                  </Box>
-                  <Typography variant="h5" m={2}>
-                    {list?.title}
-                  </Typography>
-                  <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
-                    {list?.category.name}
-                  </Box>
-                </Icons>
-
-                <CardContent>
-                  {addedItems.map((item, index) => {
-                    if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
-                      return (
-                        <Card sx={{ display: "flex", mb: 2 }} key={index}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              flex: 5,
-                            }}
-                          >
-                            <CardContent sx={{ flex: "1 0 auto" }}>
-                              <Stack direction="row" spacing={2}>
-                                <Typography component="div" variant="h3">
-                                  #{index + 1}
-                                </Typography>
-                                <Stack direction="column">
-                                  <Typography component="div" variant="h5">
-                                    {item.title}
-                                  </Typography>
-                                  <Typography variant="subtitle1" color="text.secondary" component="div">
-                                    {item.details}
-                                  </Typography>
-                                </Stack>
-                              </Stack>
-                              <Stack direction="column">
-                                <TextField
-                                  id="outlined-multiline-static"
-                                  multiline
-                                  rows={4}
-                                  value={itemBeingEdited!.userComment}
-                                  onChange={handleUserCommentOnChange}
-                                />
-                                <Stack direction="row">
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={handleSaveItemEditedOnClick}
-                                  >
-                                    Salvar
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={() => setItemBeingEdited(null)}
-                                  >
-                                    Cancelar
-                                  </Button>
-                                </Stack>
-                              </Stack>
-                            </CardContent>
-                          </Box>
-                          <CardMedia
-                            component="img"
-                            sx={{ width: 151, flex: 1 }}
-                            alt="Poster do filme"
-                            src={`${posterInitialUrl}${item.imageUrl}`}
-                          />
-                        </Card>
-                      );
-                    else
-                      return (
-                        <Card sx={{ display: "flex", mb: 2 }} key={index}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              flex: 5,
-                            }}
-                          >
-                            <CardContent sx={{ flex: "1 0 auto" }}>
-                              <Stack direction="row" spacing={2}>
-                                <Typography component="div" variant="h3">
-                                  #{index + 1}
-                                </Typography>
-                                <Stack direction="column">
-                                  <Typography component="div" variant="h5">
-                                    {item.title}
-                                  </Typography>
-                                  <Typography variant="subtitle1" color="text.secondary" component="div">
-                                    {item.details}
-                                  </Typography>
-                                </Stack>
-                              </Stack>
-                              <Typography component="div">{item.userComment}</Typography>
-                              <Stack direction="row" spacing={1}>
-                                <Button
-                                  size="small"
-                                  sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    color: "white",
-                                  }}
-                                  onClick={(_e) => setItemBeingEdited(item)}
-                                >
-                                  Editar
-                                </Button>
-                                <Button
-                                  size="small"
-                                  sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    color: "white",
-                                  }}
-                                  onClick={handleReplaceItemOnClick(item.id)}
-                                >
-                                  Substituir
-                                </Button>
-                                <Button
-                                  size="small"
-                                  sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    color: "white",
-                                  }}
-                                  onClick={handleRemoveItemOnClick(item.id)}
-                                >
-                                  Remover
-                                </Button>
-                              </Stack>
-                            </CardContent>
-                          </Box>
-                          <CardMedia
-                            component="img"
-                            sx={{ width: 151, flex: 1 }}
-                            alt="Poster do filme"
-                            src={`${posterInitialUrl}${item.imageUrl}`}
-                          />
-                        </Card>
-                      );
-                  })}
-                </CardContent>
-              </Card>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                <Button sx={buttonStyle} onClick={() => setOpenSearchItemModal(true)}>
-                  Adicionar
-                </Button>
-                <Button sx={buttonStyle} onClick={handlePublishListOnClick}>
-                  Publicar
-                </Button>
-                <Link to="/manage-lists" style={{ textDecoration: "none", color: "black" }}>
-                  <Button sx={buttonStyle} onClick={() => navigate("/manage-lists")}>
-                    Voltar
-                  </Button>
-                </Link>
-              </Box>
-            </Stack>
-          </Box>
-          <Modal
-            open={openSearchItemModal}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box sx={modalBoxStyle} component="form">
-              <Stack direction="column" display={"flex"} spacing={2}>
-                <Typography variant="h5" component="div">
-                  Adicione um novo item!
-                </Typography>
-                {/* <TextField required id="outlined-required" label="Buscar item" /> */}
-                <Paper sx={{ p: "2px 4px", display: "flex", alignItems: "center" }}>
-                  <InputBase
-                    sx={{ ml: 1, flex: 1 }}
-                    placeholder="Procurar item"
-                    inputRef={searchTitle}
-                    onKeyDown={handleItemSearchKeyDown}
-                  />
-                  <IconButton onClick={handleSearchItemClick} type="button" sx={{ p: "10px" }} aria-label="search">
-                    <SearchIcon />
-                  </IconButton>
-                </Paper>
-                <List sx={{ overflow: "auto", maxHeight: 300 }}>
-                  {apiResults.map((item, index) => (
-                    <ListItem disablePadding onClick={handleChoseItemOnClick(item)} key={index}>
-                      <ListItemButton>
-                        <ListItemText primary={item.original_title} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
-                <TextField
-                  id="outlined-multiline-static"
-                  label="Opinião"
-                  multiline
-                  rows={4}
-                  inputRef={chosenItemUsertext}
-                />
-                <Button sx={buttonStyle} onClick={handleAddItemOnClick}>
-                  Adicionar
-                </Button>
-                <Button sx={buttonStyle} onClick={() => setOpenSearchItemModal(false)}>
-                  Cancelar
-                </Button>
-              </Stack>
-            </Box>
-          </Modal>
+          <CircularProgress />
         </Container>
       </Box>
-    </>
-  );
+    );
+  else
+    return (
+      <>
+        <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
+          {/* <Container maxWidth="md">
+          <Typography variant="h3" gutterBottom>
+            Crie uma nova lista!
+          </Typography>
+        </Container> */}
+          <Container maxWidth="md">
+            <Box sx={{ display: "flex" }}>
+              <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
+                <TextField
+                  id="standard-basic"
+                  label="Título"
+                  required
+                  value={titleBeingEdited}
+                  sx={{ mt: 2, mb: 2 }}
+                  variant="standard"
+                  onBlur={handleTitleOnBlur}
+                  onChange={handleListTitleOnChange}
+                />
+
+                {/* <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, mb: 2, mr: 1 }}>
+                {list?.category.name}
+              </Typography> */}
+
+                <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
+                  <Icons></Icons>
+
+                  <CardContent>
+                    {addedItems.map((item, index) => {
+                      if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
+                        return (
+                          <Card sx={{ display: "flex", mb: 2 }} key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                flex: 5,
+                              }}
+                            >
+                              <CardContent sx={{ flex: "1 0 auto" }}>
+                                <Stack direction="row" spacing={2}>
+                                  <Typography component="div" variant="h3">
+                                    #{index + 1}
+                                  </Typography>
+                                  <Stack direction="column">
+                                    <Typography component="div" variant="h5">
+                                      {item.title}
+                                    </Typography>
+                                    <Typography variant="subtitle1" color="text.secondary" component="div">
+                                      {item.details}
+                                    </Typography>
+                                  </Stack>
+                                </Stack>
+                                <Stack direction="column">
+                                  <TextField
+                                    id="outlined-multiline-static"
+                                    multiline
+                                    rows={4}
+                                    value={itemBeingEdited!.userComment}
+                                    onChange={handleUserCommentOnChange}
+                                  />
+                                  <Stack direction="row">
+                                    <Button
+                                      size="small"
+                                      sx={{
+                                        bgcolor: theme.palette.secondary.main,
+                                        color: "white",
+                                      }}
+                                      onClick={handleSaveItemEditedOnClick}
+                                    >
+                                      Salvar
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      sx={{
+                                        bgcolor: theme.palette.secondary.main,
+                                        color: "white",
+                                      }}
+                                      onClick={() => setItemBeingEdited(null)}
+                                    >
+                                      Cancelar
+                                    </Button>
+                                  </Stack>
+                                </Stack>
+                              </CardContent>
+                            </Box>
+                            <CardMedia
+                              component="img"
+                              sx={{ width: 151, flex: 1 }}
+                              alt="Poster do filme"
+                              src={`${posterInitialUrl}${item.imageUrl}`}
+                            />
+                          </Card>
+                        );
+                      else
+                        return (
+                          <Card sx={{ display: "flex", mb: 2 }} key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                flex: 5,
+                              }}
+                            >
+                              <CardContent sx={{ flex: "1 0 auto" }}>
+                                <Stack direction="row" spacing={2}>
+                                  <Typography component="div" variant="h3">
+                                    #{index + 1}
+                                  </Typography>
+                                  <Stack direction="column">
+                                    <Typography component="div" variant="h5">
+                                      {item.title}
+                                    </Typography>
+                                    <Typography variant="subtitle1" color="text.secondary" component="div">
+                                      {item.details}
+                                    </Typography>
+                                  </Stack>
+                                </Stack>
+                                <Typography component="div">{item.userComment}</Typography>
+                                <Stack direction="row" spacing={1}>
+                                  <Button
+                                    size="small"
+                                    sx={{
+                                      bgcolor: theme.palette.secondary.main,
+                                      color: "white",
+                                    }}
+                                    onClick={(_e) => setItemBeingEdited(item)}
+                                  >
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    sx={{
+                                      bgcolor: theme.palette.secondary.main,
+                                      color: "white",
+                                    }}
+                                    onClick={handleReplaceItemOnClick(item.id)}
+                                  >
+                                    Substituir
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    sx={{
+                                      bgcolor: theme.palette.secondary.main,
+                                      color: "white",
+                                    }}
+                                    onClick={handleRemoveItemOnClick(item.id)}
+                                  >
+                                    Remover
+                                  </Button>
+                                </Stack>
+                              </CardContent>
+                            </Box>
+                            <CardMedia
+                              component="img"
+                              sx={{ width: 151, flex: 1 }}
+                              alt="Poster do filme"
+                              src={`${posterInitialUrl}${item.imageUrl}`}
+                            />
+                          </Card>
+                        );
+                    })}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                      <IconButton aria-label="add" onClick={() => setOpenSearchItemModal(true)}>
+                        <AddIcon fontSize="large" />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                  <FormControlLabel
+                    control={<Checkbox />}
+                    label="Publicar"
+                    onChange={handlePublishListOnChange}
+                    checked={publishCheckBox}
+                  />
+
+                  <Button sx={buttonStyle} onClick={() => navigate("/manage-lists")}>
+                    Sair
+                  </Button>
+                </Box>
+              </Stack>
+            </Box>
+            <Modal
+              open={openSearchItemModal}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={modalBoxStyle} component="form">
+                <Stack direction="column" display={"flex"} spacing={2}>
+                  <Typography variant="h5" component="div">
+                    Adicione um novo item!
+                  </Typography>
+                  {/* <TextField required id="outlined-required" label="Buscar item" /> */}
+                  <Paper sx={{ p: "2px 4px", display: "flex", alignItems: "center" }}>
+                    <InputBase
+                      sx={{ ml: 1, flex: 1 }}
+                      placeholder="Procurar item"
+                      inputRef={searchTitle}
+                      onKeyDown={handleItemSearchKeyDown}
+                    />
+                    <IconButton onClick={handleSearchItemClick} type="button" sx={{ p: "10px" }} aria-label="search">
+                      <SearchIcon />
+                    </IconButton>
+                  </Paper>
+                  <List sx={{ overflow: "auto", maxHeight: 300 }}>
+                    {apiResults.map((item, index) => (
+                      <ListItem disablePadding onClick={handleChoseItemOnClick(item)} key={index}>
+                        <ListItemButton>
+                          <ListItemText primary={item.original_title} />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                  <TextField
+                    id="outlined-multiline-static"
+                    label="Opinião"
+                    multiline
+                    rows={4}
+                    inputRef={chosenItemUsertext}
+                  />
+                  <Button sx={buttonStyle} onClick={handleAddItemOnClick}>
+                    Adicionar
+                  </Button>
+                  <Button sx={buttonStyle} onClick={() => setOpenSearchItemModal(false)}>
+                    Cancelar
+                  </Button>
+                </Stack>
+              </Box>
+            </Modal>
+            <Modal open={openWarningModal} onClose={() => setOpenWarningModal(false)}>
+              <Box sx={{ ...style, width: 200 }}>
+                <h2 id="child-modal-title">Aviso</h2>
+                <p id="child-modal-description">Uma lista com menos de 3 itens não pode ser publicada.</p>
+                <Button onClick={() => setOpenWarningModal(false)}>Ok</Button>
+              </Box>
+            </Modal>
+          </Container>
+        </Box>
+      </>
+    );
 };
 
 export default CreateListArea;

@@ -1,9 +1,14 @@
 AGORA
--- Separar listas postadas de não postadas usando tabs
--- Botão para editar titulo da lista
--- Exibir quantidades de likes no botão like
+
+-- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
+-- consertar like no botão, não esta renderizando com o novo like
 -- Melhorar apresentação das informações na sidebar
 -- Exibir resultados da busca do tmdb em tabela e não lista
+-- arrumar rank count
+-- permitir fazer listas de séries e atores/atrizes
+-- tratar melhor not null assertions
+
+-- tratei o not null assertion
 
 
 DESIGN:
@@ -13,7 +18,6 @@ DESIGN:
 -- Considerar colocar icones em alguns botões
 -- Incluindo o poster do filme na tabela
 -- Alguns botões somem no hover (cor igual a cor de fundo e texto)
--- Diminuir largura dos posts no feed ? (e na pagina de um usuario buscado)
 -- mudar curosr ao clicar no logo 
 
 

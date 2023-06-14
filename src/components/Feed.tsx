@@ -64,7 +64,11 @@ const Feed = () => {
 
   const handleLikeListOnClick = (id: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     likeList(id)
-      .then((_response) => {})
+      .then((_response) => {
+        setFeedContent((previousLists) =>
+          previousLists.filter((list) => (list.id === id ? { ...list, likersCount: list.likersCount + 1 } : list))
+        );
+      })
       .catch((error) => console.log(error));
   };
 
@@ -118,7 +122,7 @@ const Feed = () => {
             </CardContent>
             <CardActions>
               <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
-                Like
+                {list.likersCount} Like
               </Button>
               <Button size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
                 {list.items.length - 1 > list.shownItems!

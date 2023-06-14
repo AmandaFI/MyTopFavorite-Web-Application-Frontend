@@ -28,13 +28,13 @@ import {
   createList,
   userDrafLists,
   userPublishedLists,
+  updateList,
 } from "../services/api";
 
 const ManageLists = () => {
   const navigate = useNavigate();
   const loggedUser = useContext(UserContext);
 
-  const [loggedUserLists, setLoggedUserLists] = useState<Array<simplifiedListType>>([]);
   const [loggedUserDraftLists, setLoggedUserDrafLists] = useState<Array<simplifiedListType>>([]);
   const [loggedUserPublishedLists, setLoggedUserPublishedLists] = useState<Array<simplifiedListType>>([]);
 
@@ -47,13 +47,6 @@ const ManageLists = () => {
   const [currentTab, setCurrentTab] = React.useState<tabs>("published");
 
   useEffect(() => {
-    // userLists(loggedUser!.id)
-    //   .then((response) => {
-    //     setLoggedUserLists(response.data);
-    //     console.log(response.data);
-    //   })
-    //   .catch((error) => console.log(error));
-
     userDrafLists(loggedUser!.id)
       .then((response) => {
         setLoggedUserDrafLists(response.data);
@@ -76,20 +69,51 @@ const ManageLists = () => {
       .catch((error) => console.log(error));
   }, []);
 
-  const handleDeleteListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    deleteList(listId)
-      .then((_response) => {
-        setLoggedUserLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
-      })
-      .catch((error) => console.log(error));
-  };
+  const handleDeleteListOnClick =
+    (listId: number, draft: boolean) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      deleteList(listId)
+        .then((_response) => {
+          if (draft) setLoggedUserDrafLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
+          else setLoggedUserPublishedLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
+        })
+        .catch((error) => console.log(error));
+    };
 
   const handleEditListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     navigate(`/edit-list/${listId}`);
   };
 
+  const handlePublishListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    updateList(listId, { draft: false }).then((response) => {
+      setLoggedUserDrafLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
+      setLoggedUserPublishedLists((previousItems) => {
+        return [...previousItems, response.data];
+      });
+    });
+  };
+
+  const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //fazer reduce para cirar listCAtegories como sendo um  has onde nome é chave e id é valor
+    // const category2: oi[] = categories.reduce((acc, item, index) => [...acc, {item['name']: item.id}], [{}])
+    const category = categories.filter((category) => category.name === e.target.value);
+    setListCategory({ id: category[0].id, name: category[0].name });
+  };
+
+  const handleCreateListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    createList(listTitle, listCategory.id)
+      .then((response) => {
+        setOpenNewListForm(false);
+        navigate(`/create-list/${response.data.id}`);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const handleTabOnChange = (_e: React.SyntheticEvent, newTab: tabs) => {
+    setCurrentTab(newTab);
+  };
+
   let userListCards;
-  if (loggedUserLists !== null && currentTab === "published") {
+  if (currentTab === "published") {
     userListCards = loggedUserPublishedLists.map((card) => (
       <Card
         sx={{
@@ -124,14 +148,14 @@ const ManageLists = () => {
                 Editar
               </Button>
             </Link>
-            <Button size="small" onClick={handleDeleteListOnClick(card.id)}>
+            <Button size="small" onClick={handleDeleteListOnClick(card.id, false)}>
               Deletar
             </Button>
           </Stack>
         </CardActions>
       </Card>
     ));
-  } else if (loggedUserLists !== null && currentTab === "draft") {
+  } else if (currentTab === "draft") {
     userListCards = loggedUserDraftLists.map((card) => (
       <Card
         sx={{
@@ -166,7 +190,10 @@ const ManageLists = () => {
                 Editar
               </Button>
             </Link>
-            <Button size="small" onClick={handleDeleteListOnClick(card.id)}>
+            <Button size="small" onClick={handlePublishListOnClick(card.id)}>
+              Publicar
+            </Button>
+            <Button size="small" onClick={handleDeleteListOnClick(card.id, true)}>
               Deletar
             </Button>
           </Stack>
@@ -176,26 +203,6 @@ const ManageLists = () => {
   } else {
     userListCards = <></>;
   }
-
-  const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //fazer reduce para cirar listCAtegories como sendo um  has onde nome é chave e id é valor
-    // const category2: oi[] = categories.reduce((acc, item, index) => [...acc, {item['name']: item.id}], [{}])
-    const category = categories.filter((category) => category.name === e.target.value);
-    setListCategory({ id: category[0].id, name: category[0].name });
-  };
-
-  const handleCreateListOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    createList(listTitle, listCategory.id)
-      .then((response) => {
-        setOpenNewListForm(false);
-        navigate(`/create-list/${response.data.id}`);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const handleTabOnChange = (_e: React.SyntheticEvent, newTab: tabs) => {
-    setCurrentTab(newTab);
-  };
 
   return (
     <>
