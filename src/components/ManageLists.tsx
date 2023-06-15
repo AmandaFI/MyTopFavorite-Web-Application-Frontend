@@ -47,7 +47,7 @@ const ManageLists = () => {
   const [currentTab, setCurrentTab] = React.useState<tabs>("published");
 
   useEffect(() => {
-    userDrafLists(loggedUser!.id)
+    userDrafLists()
       .then((response) => {
         setLoggedUserDrafLists(response.data);
         console.log(response.data);
