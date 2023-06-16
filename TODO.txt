@@ -1,8 +1,5 @@
 AGORA
 
--- na pagina de managelists, nas lisas nõ publicadas, nao permitir publicar as listas com menos de 3 itens também
--- talvez remover botao de publicar dali e colocar dentro da edição
--- permitir alterar titulo da lista na edicao da mesma
 -- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
 -- consertar like no botão, não esta renderizando com o novo like
 -- Melhorar apresentação das informações na sidebar

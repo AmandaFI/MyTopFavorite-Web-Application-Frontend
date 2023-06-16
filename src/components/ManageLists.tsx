@@ -83,15 +83,6 @@ const ManageLists = () => {
     navigate(`/edit-list/${listId}`);
   };
 
-  const handlePublishListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    updateList(listId, { draft: false }).then((response) => {
-      setLoggedUserDrafLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
-      setLoggedUserPublishedLists((previousItems) => {
-        return [...previousItems, response.data];
-      });
-    });
-  };
-
   const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     //fazer reduce para cirar listCAtegories como sendo um  has onde nome é chave e id é valor
     // const category2: oi[] = categories.reduce((acc, item, index) => [...acc, {item['name']: item.id}], [{}])
@@ -190,9 +181,6 @@ const ManageLists = () => {
                 Editar
               </Button>
             </Link>
-            <Button size="small" onClick={handlePublishListOnClick(card.id)}>
-              Publicar
-            </Button>
             <Button size="small" onClick={handleDeleteListOnClick(card.id, true)}>
               Deletar
             </Button>

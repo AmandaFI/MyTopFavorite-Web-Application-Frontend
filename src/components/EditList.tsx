@@ -1,11 +1,17 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import React, { useEffect, useState, useRef, SyntheticEvent } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import theme from "../theme";
 import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
-import { completeListType, deleteItem, getSingleList, simplifiedListItemType, updateItem } from "../services/api";
-import { UserContext } from "../App";
+import {
+  completeListType,
+  deleteItem,
+  getSingleList,
+  simplifiedListItemType,
+  updateItem,
+  updateList,
+} from "../services/api";
 import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
-import { Box, Stack, TextField } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Stack, TextField } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -24,6 +30,18 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  pt: 2,
+  px: 4,
+  pb: 3,
+};
+
 const EditList = () => {
   const [listInEdit, setListInEdit] = useState<completeListType | null>(null);
   const [itemInEdit, setItemInEdit] = useState<simplifiedListItemType | null>(null);
@@ -33,15 +51,24 @@ const EditList = () => {
   const [chosenItem, setChosenItem] = useState<responseResultType | null>(null);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
   const [tmdbApiResults, setTmdbApiResults] = useState<responseResultType[]>([]);
+  const [publishCheckBox, setPublishCheckBox] = useState(false);
+  const [titleBeingEdited, setTitleBeingEdited] = useState("");
+  const [openWarningModal, setOpenWarningModal] = useState(false);
 
-  const loggedUser = useContext(UserContext);
   const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
-    getSingleList(Number(id))
-      .then((response) => setListInEdit(response.data))
-      .catch((error) => console.log(error));
+    if (id === undefined) navigate("manage-lists");
+    else {
+      getSingleList(+id)
+        .then((response) => {
+          setListInEdit(response.data);
+          setTitleBeingEdited(response.data.title);
+          setPublishCheckBox(!response.data.draft);
+        })
+        .catch((error) => console.log(error));
+    }
   }, []);
 
   const handleSearchItemClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -138,25 +165,50 @@ const EditList = () => {
     }
   };
 
+  const handleListTitleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setTitleBeingEdited(event.target.value);
+  };
+
+  const handleTitleOnBlur = (_e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => {
+    updateList(+id!, { title: titleBeingEdited })
+      .then((_response) => {})
+      .catch((error) => console.log(error));
+  };
+
+  const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
+    if (listInEdit!.items.length < 3 && checked) {
+      setOpenWarningModal(true);
+      setPublishCheckBox(false);
+    } else {
+      updateList(+id!, { draft: !checked })
+        .then((_response) => {
+          setListInEdit((previousList) => {
+            return { ...previousList!, draft: !checked };
+          });
+          setPublishCheckBox(checked);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
         <Container maxWidth="md">
           <Box sx={{ display: "flex" }}>
             <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
+              <TextField
+                id="standard-basic"
+                label="Título"
+                required
+                value={titleBeingEdited}
+                sx={{ mt: 2, mb: 2 }}
+                variant="standard"
+                onBlur={handleTitleOnBlur}
+                onChange={handleListTitleOnChange}
+              />
               <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
-                <Icons>
-                  <Box>
-                    <Avatar sx={{ mt: 2, ml: 2 }}>{`${loggedUser?.name[0]}${loggedUser!.name[1]}`}</Avatar>
-                    <Typography sx={{ ml: 2, mb: 2 }}>{loggedUser?.name}</Typography>
-                  </Box>
-                  <Typography variant="h5" m={2}>
-                    {listInEdit?.title}
-                  </Typography>
-                  <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
-                    {listInEdit?.category.name}
-                  </Box>
-                </Icons>
+                <Icons></Icons>
                 <CardContent>
                   {listInEdit?.items.map((item) => {
                     if (item.id === itemInEdit?.id)
@@ -318,16 +370,22 @@ const EditList = () => {
                       Salvar
                     </Button>
                   </Link> */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                    <FormControlLabel
+                      control={<Checkbox />}
+                      label="Publicar"
+                      onChange={handlePublishListOnChange}
+                      checked={publishCheckBox}
+                    />
 
-                  <Link to="/manage-lists" style={{ textDecoration: "none" }}>
                     <Button
                       size="small"
                       sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
                       onClick={(_e) => navigate("/manage-lists")}
                     >
-                      Voltar
+                      Sair
                     </Button>
-                  </Link>
+                  </Box>
                 </CardActions>
               </Card>
             </Stack>
@@ -372,6 +430,13 @@ const EditList = () => {
                   Cancelar
                 </Button>
               </Stack>
+            </Box>
+          </Modal>
+          <Modal open={openWarningModal} onClose={() => setOpenWarningModal(false)}>
+            <Box sx={{ ...style, width: 200 }}>
+              <h2 id="child-modal-title">Aviso</h2>
+              <p id="child-modal-description">Uma lista com menos de 3 itens não pode ser publicada.</p>
+              <Button onClick={() => setOpenWarningModal(false)}>Ok</Button>
             </Box>
           </Modal>
         </Container>

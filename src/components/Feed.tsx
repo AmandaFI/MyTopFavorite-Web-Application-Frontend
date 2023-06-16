@@ -4,7 +4,7 @@ import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from 
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons } from "../styleHelpers";
-import { Box, Container, Stack } from "@mui/material";
+import { Box, Container, IconButton, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -13,6 +13,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
@@ -134,9 +135,11 @@ const Feed = () => {
             </CardActions>
           </Card>
         ))}
-        <Button size="small" sx={{ color: "black" }} onClick={handleLoadMoreListsOnClick}>
-          Carregar mais
-        </Button>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <IconButton aria-label="add" onClick={handleLoadMoreListsOnClick}>
+            <AddIcon fontSize="large" />
+          </IconButton>
+        </Box>
       </Container>
     </Box>
   );

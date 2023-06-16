@@ -84,6 +84,7 @@ export const searchUserById = (id: number) => axios.get<postUserType>(`/users/${
 export const searchUsersByName = (name: string) => axios.post<Array<userType>>("/users/find_users", { name });
 export const followUser = (user_id: number) => axios.post<userType>("/users/follow", { user_id });
 export const unfollowUser = (user_id: number) => axios.delete(`/users/unfollow?user_id=${user_id}`);
+export const checkFollowingUser = (user_id: number) => axios.get<userType>(`/users/${user_id}/check_following`);
 
 // ----- List
 export const userLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists?id=${id}`);

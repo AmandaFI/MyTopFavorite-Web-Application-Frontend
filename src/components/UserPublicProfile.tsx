@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { posterInitialUrl } from "../services/tmdbApi";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   completeListType,
   searchUserById,
@@ -23,26 +23,36 @@ import {
   followUser,
   unfollowUser,
   userPublishedListsPaginated,
+  checkFollowingUser,
 } from "../services/api";
 
 export const UserPublicProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [searchedUser, setSearchedUser] = useState<postUserType>();
   const [searchedUserLists, setSearchedUserLists] = useState<Array<completeListType>>([]);
   const [following, setFollowing] = useState(false);
   const [paginationPage, setPaginationPage] = useState(1);
 
   useEffect(() => {
-    searchUserById(+id!)
-      .then((response) => {
-        console.log("carregando listas");
-        setSearchedUser(response.data);
-        userPublishedListsPaginated(+id!, paginationPage).then((response) => {
-          setSearchedUserLists(response.data as completeListType[]);
-          setPaginationPage((previousPage) => previousPage + 1);
-        });
-      })
-      .catch((error) => console.log(error));
+    if (id === undefined) navigate("/feed");
+    else {
+      searchUserById(+id)
+        .then((response) => {
+          console.log("carregando listas");
+          setSearchedUser(response.data);
+          userPublishedListsPaginated(+id!, paginationPage).then((response) => {
+            setSearchedUserLists(response.data as completeListType[]);
+            setPaginationPage((previousPage) => previousPage + 1);
+          });
+        })
+        .catch((error) => console.log(error));
+      checkFollowingUser(+id)
+        .then((_response) => {
+          setFollowing(true);
+        })
+        .catch((error) => console.log(error));
+    }
   }, [id]);
 
   const handleFollowUserOnCLick = () => {

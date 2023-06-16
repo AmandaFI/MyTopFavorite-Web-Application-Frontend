@@ -15,6 +15,7 @@ import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import { UserContext } from "../App";
 import { Link } from "react-router-dom";
+import { stringToColor } from "../styleHelpers";
 
 const Sidebar = () => {
   const loggedUser = useContext(UserContext);
@@ -33,9 +34,7 @@ const Sidebar = () => {
     >
       <Box position="fixed" sx={{ display: "flex" }}>
         <Stack direction="column" spacing={1} alignItems={"center"}>
-          <Avatar sx={{ bgcolor: "grey", width: 160, height: 160 }}>{`${loggedUser!.name[0]}${
-            loggedUser!.name[1]
-          }`}</Avatar>
+          <Avatar sx={{ bgcolor: stringToColor(loggedUser!.name), width: 160, height: 160 }}></Avatar>
           <Stack sx={{ display: "flex", direction: "row", alignItems: "center" }}>
             <Typography variant="h5">{loggedUser!.name}</Typography>
             <Typography>{loggedUser!.email}</Typography>
