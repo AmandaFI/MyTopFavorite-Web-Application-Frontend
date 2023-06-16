@@ -17,6 +17,8 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Tabs from "@mui/material/Tabs";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Tab from "@mui/material/Tab";
 import {
   categoryType,
@@ -134,14 +136,12 @@ const ManageLists = () => {
         </CardContent>
         <CardActions disableSpacing sx={{ mt: "auto", display: "flex" }}>
           <Stack direction="row" display="flex" justifyContent="end">
-            <Link to={`/edit-list/${card.id}`} style={{ textDecoration: "none", color: "white" }}>
-              <Button size="small" onClick={handleEditListOnClick(card.id)}>
-                Editar
-              </Button>
-            </Link>
-            <Button size="small" onClick={handleDeleteListOnClick(card.id, false)}>
-              Deletar
-            </Button>
+            <IconButton aria-label="add" onClick={handleEditListOnClick(card.id)}>
+              <EditIcon fontSize="medium" />
+            </IconButton>
+            <IconButton aria-label="add" onClick={handleDeleteListOnClick(card.id, false)}>
+              <DeleteIcon fontSize="medium" />
+            </IconButton>
           </Stack>
         </CardActions>
       </Card>
@@ -176,14 +176,12 @@ const ManageLists = () => {
         </CardContent>
         <CardActions disableSpacing sx={{ mt: "auto", display: "flex" }}>
           <Stack direction="row" display="flex" justifyContent="end">
-            <Link to={`/edit-list/${card.id}`} style={{ textDecoration: "none", color: "white" }}>
-              <Button size="small" onClick={handleEditListOnClick(card.id)}>
-                Editar
-              </Button>
-            </Link>
-            <Button size="small" onClick={handleDeleteListOnClick(card.id, true)}>
-              Deletar
-            </Button>
+            <IconButton aria-label="add" onClick={handleEditListOnClick(card.id)}>
+              <EditIcon fontSize="medium" />
+            </IconButton>
+            <IconButton aria-label="add" onClick={handleDeleteListOnClick(card.id, true)}>
+              <DeleteIcon fontSize="medium" />
+            </IconButton>
           </Stack>
         </CardActions>
       </Card>
@@ -233,7 +231,7 @@ const ManageLists = () => {
                   },
                 }}
               >
-                <Tab value="published" label="Piblicadas" />
+                <Tab value="published" label="Publicadas" />
                 <Tab value="draft" label="Não Publicadas" />
               </Tabs>
               <Box

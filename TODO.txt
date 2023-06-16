@@ -1,5 +1,6 @@
 AGORA
 
+-- icones nos botoes das telas de criaçao e edicao
 -- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
 -- consertar like no botão, não esta renderizando com o novo like
 -- Melhorar apresentação das informações na sidebar
