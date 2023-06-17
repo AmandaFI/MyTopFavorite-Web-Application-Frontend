@@ -2,8 +2,7 @@ AGORA
 
 
 -- PAGINAR LISTAS DO USUARIO BUSCADO
-- Drag and drop para editar ordem dos itens na lista ( edição e criação ) só funciona com o StrictMode desligado
--- arrumar rank count
+
 
 -- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
 -- consertar like no botão, não esta renderizando com o novo like
@@ -30,4 +29,4 @@ FUNCIONALIDADES
 PROBLEMAS ATUAIS
 
 - Depois de um like, indicar que a lista já foi liked e mudar o botão para dislike
-- Corrigir numeração dos itens da lsita durante a edição da mesma
+

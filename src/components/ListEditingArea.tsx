@@ -32,6 +32,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 // https://fkhadra.github.io/react-toastify/introduction
 import { ToastContainer, toast } from "react-toastify";
@@ -46,7 +47,7 @@ import {
   updateItem,
   updateList,
 } from "../services/api";
-import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
+import { Icons, baseToast, buttonStyle, modalBoxStyle } from "../styleHelpers";
 
 type genericTmdbResults = {
   externalApiIdentifier: string;
@@ -68,6 +69,7 @@ const ListEditingArea = () => {
           setList(response.data);
           setTitleBeingEdited(response.data.title);
           setPublishCheckBox(!response.data.draft);
+          setRankCount(response.data.items.length);
         })
         .catch((error) => console.log(error));
     }
@@ -175,9 +177,10 @@ const ListEditingArea = () => {
   };
 
   const apiInputListItemTypeFormatter = (item: genericTmdbResults, comment: string) => {
+    setRankCount((previousValue) => previousValue + 1);
     return {
       ...item,
-      rank: rankCount,
+      rank: rankCount + 1,
       userComment: comment,
     };
   };
@@ -203,7 +206,6 @@ const ListEditingArea = () => {
       insertItem(Number(list?.id), newItem)
         .then((response) => {
           const addedItem = listItemTypeFormatter(response.data);
-          setRankCount((previousValue) => previousValue + 1);
           setList((previousList) => {
             return { ...previousList!, items: [...previousList!.items, addedItem] };
           });
@@ -211,7 +213,7 @@ const ListEditingArea = () => {
         })
         .catch((error) => console.log(error));
     } else {
-      updateItem({ id: itemToBeReplaced, ...newItem })
+      updateItem(newItem, itemToBeReplaced)
         .then((response) => {
           const replacedItem = listItemTypeFormatter(response.data);
           setList((previousList) => {
@@ -232,32 +234,40 @@ const ListEditingArea = () => {
     setOpenSearchItemModal(true);
   };
 
-  const handleRemoveItemOnClick = (removeItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // RESOLVER SE VAI ATUALIZAR A LISTA NO BANCO COMO NÃO PUBLICADA OU NÃO VAI PERMITIR A REMOÇAÕ
-    if (list!.draft === false && list!.items.length < 4) {
-      toast.error("Uma lista publicada não pode ter menos que 3 itens.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    }
-    // SE NÃO FOR PERMITIR A REMOÇÃO AQUI VAI O ELSE
-    deleteItem(removeItemId)
-      .then((_response) => {
-        setList((previousList) => {
-          return {
-            ...previousList!,
-            items: previousList!.items.filter((item) => item.id !== removeItemId),
-          };
+  const handleRemoveItemOnClick =
+    (removeItemId: number, removeItemIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (list!.draft === false && list!.items.length < 4) {
+        toast.warn("Uma lista publicada não pode ter menos que 3 itens. A lista será mantida privada.", {
+          ...baseToast,
         });
-      })
-      .catch((error) => console.log(error));
-  };
+        updateList(list!.id, { draft: true })
+          .then(() => setPublishCheckBox(false))
+          .catch((error) => console.log(error));
+      }
+      let success = true;
+      deleteItem(removeItemId)
+        .then((_response) => {
+          setRankCount((previousCount) => previousCount - 1);
+          list!.items.forEach((item, index) => {
+            if (index > removeItemIndex - 1) {
+              updateItem({ rank: item.rank - 1 }, item.id)
+                .then(() => {})
+                .catch(() => (success = false));
+            }
+          });
+          if (success) {
+            setList((previousList) => {
+              return {
+                ...previousList!,
+                items: previousList!.items
+                  .filter((item) => item.id !== removeItemId)
+                  .map((item, index) => (index > removeItemIndex - 1 ? { ...item, rank: item.rank - 1 } : item)),
+              };
+            });
+          }
+        })
+        .catch((error) => console.log(error));
+    };
 
   const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const editedItem = {
@@ -268,7 +278,7 @@ const ListEditingArea = () => {
   };
 
   const handleSaveItemEditedOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    updateItem(itemBeingEdited!)
+    updateItem(itemBeingEdited!, itemBeingEdited!.id)
       .then((response) => {
         const editedItem = listItemTypeFormatter(response.data);
         setList((previousList) => {
@@ -287,14 +297,7 @@ const ListEditingArea = () => {
   const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
     if (list!.items.length < 3 && checked) {
       toast.warn("Atenção! Uma lista com menos de 3 itens não pode ser publicada.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
+        ...baseToast,
       });
     } else if (checked) {
       updateList(list!.id, { draft: false })
@@ -314,6 +317,33 @@ const ListEditingArea = () => {
 
   const handleTitleOnBlur = (_e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => {
     updateList(list!.id, { title: titleBeingEdited });
+  };
+
+  const handleOnDragEnd = (result: any) => {
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    updateItem({ rank: destinationIndex + 1 }, list!.items[sourceIndex].id)
+      .then(() => {
+        updateItem({ rank: sourceIndex + 1 }, list!.items[destinationIndex].id)
+          .then(() => {
+            console.log("updated");
+            setList((previousList) => {
+              return {
+                ...previousList!,
+                items: previousList!.items.map((item, index) => {
+                  if (index === sourceIndex) {
+                    return { ...previousList!.items[destinationIndex], rank: index + 1 };
+                  } else if (index === destinationIndex)
+                    return { ...previousList!.items[sourceIndex], rank: index + 1 };
+                  else return item;
+                }),
+              };
+            });
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
   };
 
   if (list === null)
@@ -342,120 +372,146 @@ const ListEditingArea = () => {
                   onBlur={handleTitleOnBlur}
                   onChange={handleListTitleOnChange}
                 />
+                <DragDropContext onDragEnd={handleOnDragEnd}>
+                  <Droppable droppableId="characters">
+                    {(provided) => (
+                      <Card
+                        sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}
+                        className="characters"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        <Icons></Icons>
 
-                <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
-                  <Icons></Icons>
+                        <CardContent>
+                          {list.items
+                            .sort((a, b) => a.rank - b.rank)
+                            .map((item, index) => {
+                              if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
+                                return (
+                                  <Card sx={{ display: "flex", mb: 2 }} key={index}>
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        flex: 5,
+                                      }}
+                                    >
+                                      <CardContent sx={{ flex: "1 0 auto" }}>
+                                        <Stack direction="row" spacing={2}>
+                                          <Typography component="div" variant="h3">
+                                            {item.rank}
+                                          </Typography>
+                                          <Stack direction="column">
+                                            <Typography component="div" variant="h5">
+                                              {item.title}
+                                            </Typography>
+                                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                                              {item.details}
+                                            </Typography>
+                                          </Stack>
+                                        </Stack>
+                                        <Stack direction="column">
+                                          <TextField
+                                            id="outlined-multiline-static"
+                                            multiline
+                                            rows={4}
+                                            value={itemBeingEdited!.userComment}
+                                            onChange={handleUserCommentOnChange}
+                                          />
+                                          <Stack direction="row">
+                                            <IconButton aria-label="edit" onClick={handleSaveItemEditedOnClick}>
+                                              <CheckIcon fontSize="medium" />
+                                            </IconButton>
 
-                  <CardContent>
-                    {list.items.map((item, index) => {
-                      if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
-                        return (
-                          <Card sx={{ display: "flex", mb: 2 }} key={index}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                flex: 5,
-                              }}
-                            >
-                              <CardContent sx={{ flex: "1 0 auto" }}>
-                                <Stack direction="row" spacing={2}>
-                                  <Typography component="div" variant="h3">
-                                    #{index + 1}
-                                  </Typography>
-                                  <Stack direction="column">
-                                    <Typography component="div" variant="h5">
-                                      {item.title}
-                                    </Typography>
-                                    <Typography variant="subtitle1" color="text.secondary" component="div">
-                                      {item.details}
-                                    </Typography>
-                                  </Stack>
-                                </Stack>
-                                <Stack direction="column">
-                                  <TextField
-                                    id="outlined-multiline-static"
-                                    multiline
-                                    rows={4}
-                                    value={itemBeingEdited!.userComment}
-                                    onChange={handleUserCommentOnChange}
-                                  />
-                                  <Stack direction="row">
-                                    <IconButton aria-label="edit" onClick={handleSaveItemEditedOnClick}>
-                                      <CheckIcon fontSize="medium" />
-                                    </IconButton>
+                                            <IconButton aria-label="edit" onClick={() => setItemBeingEdited(null)}>
+                                              <CloseIcon fontSize="medium" />
+                                            </IconButton>
+                                          </Stack>
+                                        </Stack>
+                                      </CardContent>
+                                    </Box>
+                                    <CardMedia
+                                      component="img"
+                                      sx={{ width: 151, flex: 1 }}
+                                      alt="Poster do filme"
+                                      src={`${posterInitialUrl}${item.imageUrl}`}
+                                    />
+                                  </Card>
+                                );
+                              else
+                                return (
+                                  <Draggable key={item.id} draggableId={String(item.id)} index={index}>
+                                    {(provided) => (
+                                      <Card
+                                        sx={{ display: "flex", mb: 2 }}
+                                        key={index}
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                      >
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            flex: 5,
+                                          }}
+                                        >
+                                          <CardContent sx={{ flex: "1 0 auto" }}>
+                                            <Stack direction="row" spacing={2}>
+                                              <Typography component="div" variant="h3">
+                                                {item.rank}
+                                              </Typography>
+                                              <Stack direction="column">
+                                                <Typography component="div" variant="h5">
+                                                  {item.title}
+                                                </Typography>
+                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                  {item.details}
+                                                </Typography>
+                                              </Stack>
+                                            </Stack>
+                                            <Typography component="div">{item.userComment}</Typography>
+                                          </CardContent>
+                                          <Stack direction="row" spacing={1}>
+                                            <IconButton aria-label="edit" onClick={(_e) => setItemBeingEdited(item)}>
+                                              <EditIcon fontSize="medium" />
+                                            </IconButton>
 
-                                    <IconButton aria-label="edit" onClick={() => setItemBeingEdited(null)}>
-                                      <CloseIcon fontSize="medium" />
-                                    </IconButton>
-                                  </Stack>
-                                </Stack>
-                              </CardContent>
-                            </Box>
-                            <CardMedia
-                              component="img"
-                              sx={{ width: 151, flex: 1 }}
-                              alt="Poster do filme"
-                              src={`${posterInitialUrl}${item.imageUrl}`}
-                            />
-                          </Card>
-                        );
-                      else
-                        return (
-                          <Card sx={{ display: "flex", mb: 2 }} key={index}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                flex: 5,
-                              }}
-                            >
-                              <CardContent sx={{ flex: "1 0 auto" }}>
-                                <Stack direction="row" spacing={2}>
-                                  <Typography component="div" variant="h3">
-                                    #{index + 1}
-                                  </Typography>
-                                  <Stack direction="column">
-                                    <Typography component="div" variant="h5">
-                                      {item.title}
-                                    </Typography>
-                                    <Typography variant="subtitle1" color="text.secondary" component="div">
-                                      {item.details}
-                                    </Typography>
-                                  </Stack>
-                                </Stack>
-                                <Typography component="div">{item.userComment}</Typography>
-                              </CardContent>
-                              <Stack direction="row" spacing={1}>
-                                <IconButton aria-label="edit" onClick={(_e) => setItemBeingEdited(item)}>
-                                  <EditIcon fontSize="medium" />
-                                </IconButton>
+                                            <IconButton aria-label="search" onClick={handleReplaceItemOnClick(item.id)}>
+                                              <SearchIcon fontSize="medium" />
+                                            </IconButton>
 
-                                <IconButton aria-label="search" onClick={handleReplaceItemOnClick(item.id)}>
-                                  <SearchIcon fontSize="medium" />
-                                </IconButton>
-
-                                <IconButton aria-label="delete" onClick={handleRemoveItemOnClick(item.id)}>
-                                  <DeleteIcon fontSize="medium" />
-                                </IconButton>
-                              </Stack>
-                            </Box>
-                            <CardMedia
-                              component="img"
-                              sx={{ width: 151, flex: 1 }}
-                              alt="Poster do filme"
-                              src={`${posterInitialUrl}${item.imageUrl}`}
-                            />
-                          </Card>
-                        );
-                    })}
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                      <IconButton aria-label="add" onClick={() => setOpenSearchItemModal(true)}>
-                        <AddIcon fontSize="large" />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
+                                            <IconButton
+                                              aria-label="delete"
+                                              onClick={handleRemoveItemOnClick(item.id, index)}
+                                            >
+                                              <DeleteIcon fontSize="medium" />
+                                            </IconButton>
+                                          </Stack>
+                                        </Box>
+                                        <CardMedia
+                                          component="img"
+                                          sx={{ width: 151, flex: 1 }}
+                                          alt="Poster do filme"
+                                          src={`${posterInitialUrl}${item.imageUrl}`}
+                                        />
+                                      </Card>
+                                    )}
+                                  </Draggable>
+                                );
+                            })}
+                          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                            <IconButton aria-label="add" onClick={() => setOpenSearchItemModal(true)}>
+                              <AddIcon fontSize="large" />
+                            </IconButton>
+                          </Box>
+                        </CardContent>
+                        {provided.placeholder}
+                      </Card>
+                    )}
+                  </Droppable>
+                </DragDropContext>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
                   <FormControlLabel
                     control={<Checkbox />}
@@ -480,7 +536,6 @@ const ListEditingArea = () => {
                   <Typography variant="h5" component="div">
                     Adicione um novo item!
                   </Typography>
-                  {/* <TextField required id="outlined-required" label="Buscar item" /> */}
                   <Paper sx={{ p: "2px 4px", display: "flex", alignItems: "center" }}>
                     <InputBase
                       sx={{ ml: 1, flex: 1 }}

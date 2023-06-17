@@ -36,6 +36,7 @@ export type completeListItemType = {
 // Omit<Type, Keys> cria um tipo com todas as properties do Type passado, exceto as properties indicadas em Keys
 export type simplifiedListItemType = Omit<completeListItemType, "list">;
 export type postListItemType = Omit<completeListItemType, "id" | "list">;
+export type putListItemType = Partial<Omit<completeListItemType, "id" | "list">>;
 
 // ------------------- Category
 export type categoryType = {
@@ -89,12 +90,10 @@ export const checkFollowingUser = (user_id: number) => axios.get<userType>(`/use
 // ----- List
 export const userLists = (id: number) => axios.get<Array<simplifiedListType>>(`/lists?id=${id}`);
 export const userDrafLists = () => axios.get<Array<simplifiedListType>>(`/lists/draft_lists`); // somente user pode ver suas drafted lists
-
 export const userPublishedLists = (id: number) =>
   axios.get<Array<simplifiedListType | completeListType>>(`/lists/${id}/published_lists`);
 export const userPublishedListsPaginated = (id: number, page: number) =>
   axios.get<Array<completeListType>>(`/lists/${id}/published_lists?page=${page}&per_page=2`);
-
 export const deleteList = (listId: number) => axios.delete<Array<simplifiedListType>>(`/lists/${listId}`);
 export const createList = (title: string, category_id: number) =>
   axios.post<simplifiedListType>("/lists", { title, category_id });
@@ -108,6 +107,6 @@ export const allCategories = () => axios.get<Array<categoryType>>("/categories")
 // ----- ListItem
 export const insertItem = (listId: number, item: postListItemType) =>
   axios.post<completeListItemType>("/list_items", { listId, ...item });
-export const updateItem = (item: simplifiedListItemType) =>
-  axios.put<completeListItemType>(`/list_items/${item.id}`, item);
+export const updateItem = (item: putListItemType, id: number) =>
+  axios.put<completeListItemType>(`/list_items/${id}`, item);
 export const deleteItem = (itemId: number) => axios.delete(`/list_items/${itemId}`);

@@ -12,11 +12,11 @@
   "dependencies": {
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
+    "@hello-pangea/dnd": "^16.2.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.3",
     "axios": "^1.4.0",
     "react": "^18.2.0",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.1",
     "react-toastify": "^9.1.3"

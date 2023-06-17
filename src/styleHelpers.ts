@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
 import theme from "./theme";
+import { ToastOptions } from "react-toastify";
 
 export const Icons = styled(Box)(() => ({
   display: "flex",
@@ -49,3 +50,14 @@ export const stringToColor = (string: string) => {
 
   return color;
 };
+
+export const baseToast: ToastOptions = {
+  position: "top-right",
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  theme: "dark",
+}
