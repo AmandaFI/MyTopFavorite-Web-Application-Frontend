@@ -1,7 +1,6 @@
 AGORA
 
-
--- PAGINAR LISTAS DO USUARIO BUSCADO
+-- limpar autocomplete apos pesquisar usario
 
 
 -- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez

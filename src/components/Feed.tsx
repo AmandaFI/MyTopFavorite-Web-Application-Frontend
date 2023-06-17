@@ -14,6 +14,11 @@ import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import StarOutlineIcon from "@mui/icons-material/StarOutline";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
@@ -124,16 +129,31 @@ const Feed = () => {
               ))}
             </CardContent>
             <CardActions>
-              <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
+              {/* <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
                 {list.likersCount} Like
-              </Button>
-              <Button size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
-                {list.items.length - 1 > list.shownItems!
-                  ? "Ver mais"
-                  : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST
-                  ? ""
-                  : "Ver menos"}
-              </Button>
+              </Button> */}
+              {/* // Mudar para mostara like ou deslike */}
+              <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
+                {list.items.length - 1 > list.shownItems! ? (
+                  <ThumbUpOffAltIcon fontSize="large" />
+                ) : (
+                  <ThumbUpAltIcon fontSize="large" />
+                )}
+              </IconButton>
+              <IconButton
+                aria-label="add"
+                size="small"
+                sx={{ color: "black" }}
+                onClick={handleShowMoreOnClick(listIndex)}
+              >
+                {list.items.length - 1 > list.shownItems! ? (
+                  <KeyboardArrowDownIcon fontSize="medium" />
+                ) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+                  ""
+                ) : (
+                  <KeyboardArrowUpIcon fontSize="medium" />
+                )}
+              </IconButton>
             </CardActions>
           </Card>
         ))}

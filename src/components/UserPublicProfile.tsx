@@ -68,6 +68,16 @@ export const UserPublicProfile = () => {
     }
   };
 
+  const handleLoadMoreListsOnClick = () => {
+    if (id === undefined) navigate("/feed");
+    else {
+      userPublishedListsPaginated(+id, paginationPage).then((response) => {
+        setSearchedUserLists((previousLists) => [...previousLists, ...(response.data as completeListType[])]);
+        setPaginationPage((previousPage) => previousPage + 1);
+      });
+    }
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", flex: 10 }}>
@@ -180,7 +190,7 @@ export const UserPublicProfile = () => {
                 </Card>
               ))}
               <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-                <IconButton aria-label="add">
+                <IconButton aria-label="add" onClick={handleLoadMoreListsOnClick}>
                   <AddIcon fontSize="large" />
                 </IconButton>
               </Box>

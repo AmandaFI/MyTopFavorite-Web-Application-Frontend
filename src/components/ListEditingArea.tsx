@@ -32,6 +32,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+
+// https://github.com/hello-pangea/dnd/blob/main/docs/about/installation.md
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 // https://fkhadra.github.io/react-toastify/introduction
@@ -57,9 +59,23 @@ type genericTmdbResults = {
 };
 
 const ListEditingArea = () => {
-  const [list, setList] = useState<completeListType | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [list, setList] = useState<completeListType | null>(null);
+
+  const [chosenItem, setChosenItem] = useState<genericTmdbResults | boolean>(false);
+  const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
+
+  const searchTitle = useRef<HTMLInputElement | null>(null);
+  const [tmdbApiResults, setTmdbApiResults] = useState<genericTmdbResults[]>([]);
+
+  const [titleBeingEdited, setTitleBeingEdited] = useState("");
+  const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
+  const [publishCheckBox, setPublishCheckBox] = useState(false);
+  const [rankCount, setRankCount] = useState(0);
+
+  const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
 
   useEffect(() => {
     if (id === undefined) navigate("/manage-lists");
@@ -74,21 +90,6 @@ const ListEditingArea = () => {
         .catch((error) => console.log(error));
     }
   }, []);
-
-  const [chosenItem, setChosenItem] = useState<genericTmdbResults | boolean>(false);
-  const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
-
-  const searchTitle = useRef<HTMLInputElement | null>(null);
-  const [tmdbApiResults, setTmdbApiResults] = useState<genericTmdbResults[]>([]);
-
-  const [titleBeingEdited, setTitleBeingEdited] = useState("");
-  const [itemToBeReplaced, setItemToBeReplaced] = useState<number | null>(null);
-  const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
-  const [publishCheckBox, setPublishCheckBox] = useState(false);
-
-  const [rankCount, setRankCount] = useState(0);
-
-  const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
 
   // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
   const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -177,10 +178,12 @@ const ListEditingArea = () => {
   };
 
   const apiInputListItemTypeFormatter = (item: genericTmdbResults, comment: string) => {
-    setRankCount((previousValue) => previousValue + 1);
+    if (itemBeingEdited === null) {
+      setRankCount((previousValue) => previousValue + 1);
+    }
     return {
       ...item,
-      rank: rankCount + 1,
+      rank: itemBeingEdited === null ? rankCount + 1 : itemBeingEdited.rank,
       userComment: comment,
     };
   };
@@ -202,7 +205,7 @@ const ListEditingArea = () => {
       chosenItem as genericTmdbResults,
       chosenItemUsertext!.current!.value
     );
-    if (itemToBeReplaced === null) {
+    if (itemBeingEdited === null) {
       insertItem(Number(list?.id), newItem)
         .then((response) => {
           const addedItem = listItemTypeFormatter(response.data);
@@ -213,7 +216,7 @@ const ListEditingArea = () => {
         })
         .catch((error) => console.log(error));
     } else {
-      updateItem(newItem, itemToBeReplaced)
+      updateItem(newItem, itemBeingEdited.id)
         .then((response) => {
           const replacedItem = listItemTypeFormatter(response.data);
           setList((previousList) => {
@@ -222,17 +225,18 @@ const ListEditingArea = () => {
               items: previousList!.items.map((item) => (item.id === replacedItem.id ? replacedItem : item)),
             };
           });
-          setItemToBeReplaced(null);
+          setItemBeingEdited(null);
           setOpenSearchItemModal(false);
         })
         .catch((error) => console.log(error));
     }
   };
 
-  const handleReplaceItemOnClick = (replaceItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setItemToBeReplaced(replaceItemId);
-    setOpenSearchItemModal(true);
-  };
+  const handleReplaceItemOnClick =
+    (item: simplifiedListItemType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      setItemBeingEdited(item);
+      setOpenSearchItemModal(true);
+    };
 
   const handleRemoveItemOnClick =
     (removeItemId: number, removeItemIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -311,12 +315,10 @@ const ListEditingArea = () => {
     } else setPublishCheckBox(false);
   };
 
-  const handleListTitleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setTitleBeingEdited(event.target.value);
-  };
-
   const handleTitleOnBlur = (_e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => {
-    updateList(list!.id, { title: titleBeingEdited });
+    updateList(list!.id, { title: titleBeingEdited })
+      .then(() => {})
+      .catch((error) => console.log(error));
   };
 
   const handleOnDragEnd = (result: any) => {
@@ -370,7 +372,7 @@ const ListEditingArea = () => {
                   sx={{ mt: 2, mb: 2 }}
                   variant="standard"
                   onBlur={handleTitleOnBlur}
-                  onChange={handleListTitleOnChange}
+                  onChange={(e) => setTitleBeingEdited(e.target.value)}
                 />
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                   <Droppable droppableId="characters">
@@ -478,7 +480,7 @@ const ListEditingArea = () => {
                                               <EditIcon fontSize="medium" />
                                             </IconButton>
 
-                                            <IconButton aria-label="search" onClick={handleReplaceItemOnClick(item.id)}>
+                                            <IconButton aria-label="search" onClick={handleReplaceItemOnClick(item)}>
                                               <SearchIcon fontSize="medium" />
                                             </IconButton>
 
