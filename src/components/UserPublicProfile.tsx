@@ -10,6 +10,7 @@ import {
   CardContent,
   CardMedia,
   Container,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -18,14 +19,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   completeListType,
   searchUserById,
-  userPublishedLists,
-  postUserType,
   followUser,
   unfollowUser,
   userPublishedListsPaginated,
   checkFollowingUser,
   userType,
 } from "../services/api";
+import AddIcon from "@mui/icons-material/Add";
 
 export const UserPublicProfile = () => {
   const { id } = useParams();
@@ -179,9 +179,11 @@ export const UserPublicProfile = () => {
                   </CardActions>
                 </Card>
               ))}
-              <Button size="small" sx={{ color: "black" }}>
-                Carregar mais
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <IconButton aria-label="add">
+                  <AddIcon fontSize="large" />
+                </IconButton>
+              </Box>
             </Container>
           </Box>
         </Stack>

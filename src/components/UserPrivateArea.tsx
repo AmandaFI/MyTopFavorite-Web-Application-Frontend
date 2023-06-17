@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { buttonStyle, modalBoxStyle } from "../styleHelpers";
 import theme from "../theme";
 import { UserContext } from "../App";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { Stack } from "@mui/material";
 import Card from "@mui/material/Card";
@@ -30,7 +30,7 @@ import {
   userPublishedLists,
 } from "../services/api";
 
-const ManageLists = () => {
+const UserPrivateArea = () => {
   const navigate = useNavigate();
   const loggedUser = useContext(UserContext);
 
@@ -80,7 +80,6 @@ const ManageLists = () => {
 
   const handleEditListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     navigate(`/edit-list/${listId}`);
-    // navigate(`/create-list/${listId}`);
   };
 
   const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +93,7 @@ const ManageLists = () => {
     createList(listTitle, listCategory.id)
       .then((response) => {
         setOpenNewListForm(false);
-        navigate(`/create-list/${response.data.id}`);
+        navigate(`/edit-list/${response.data.id}`);
       })
       .catch((error) => console.log(error));
   };
@@ -298,4 +297,4 @@ const ManageLists = () => {
   );
 };
 
-export default ManageLists;
+export default UserPrivateArea;

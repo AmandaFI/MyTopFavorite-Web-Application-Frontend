@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 
-type signInProps = {
+type signInFormProps = {
   setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -29,7 +29,7 @@ const Copyright = (props: any) => {
   );
 };
 
-export default function SignIn(props: signInProps) {
+export default function SignInForm(props: signInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitButtonInactive, setSubmitButtonInactive] = useState(false);

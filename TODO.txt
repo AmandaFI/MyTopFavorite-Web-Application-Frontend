@@ -1,10 +1,14 @@
 AGORA
 
+
+-- PAGINAR LISTAS DO USUARIO BUSCADO
+- Drag and drop para editar ordem dos itens na lista ( edição e criação ) só funciona com o StrictMode desligado
+-- arrumar rank count
+
 -- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
 -- consertar like no botão, não esta renderizando com o novo like
 -- Melhorar apresentação das informações na sidebar
 -- Exibir resultados da busca do tmdb em tabela e não lista
--- arrumar rank count
 -- tratar melhor not null assertions
 -- tratei o not null assertion
 
@@ -26,5 +30,4 @@ FUNCIONALIDADES
 PROBLEMAS ATUAIS
 
 - Depois de um like, indicar que a lista já foi liked e mudar o botão para dislike
-- Drag and drop para editar ordem dos itens na lista ( edição e criação ) só funciona com o StrictMode desligado
 - Corrigir numeração dos itens da lsita durante a edição da mesma

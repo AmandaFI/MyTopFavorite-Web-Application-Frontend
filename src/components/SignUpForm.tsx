@@ -23,11 +23,11 @@ const Copyright = (props: any) => {
   );
 };
 
-export type signUpPorpsType = {
+export type signUpFormPropsType = {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function SignUp(props: signUpPorpsType) {
+export default function SignUpForm(props: signUpFormPropsType) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");

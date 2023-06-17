@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext, SyntheticEvent } from "react";
+import React, { useEffect, useState, useRef, SyntheticEvent } from "react";
 import { Box, Checkbox, CircularProgress, FormControlLabel, Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -55,7 +55,7 @@ type genericTmdbResults = {
   details: string;
 };
 
-const CreateListArea = () => {
+const ListEditingArea = () => {
   const [list, setList] = useState<completeListType | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,12 +67,12 @@ const CreateListArea = () => {
         .then((response) => {
           setList(response.data);
           setTitleBeingEdited(response.data.title);
+          setPublishCheckBox(!response.data.draft);
         })
         .catch((error) => console.log(error));
     }
   }, []);
 
-  const [addedItems, setAddedItems] = useState<simplifiedListItemType[]>([]);
   const [chosenItem, setChosenItem] = useState<genericTmdbResults | boolean>(false);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
 
@@ -204,8 +204,9 @@ const CreateListArea = () => {
         .then((response) => {
           const addedItem = listItemTypeFormatter(response.data);
           setRankCount((previousValue) => previousValue + 1);
-
-          setAddedItems((previousItems) => [...previousItems, addedItem]);
+          setList((previousList) => {
+            return { ...previousList!, items: [...previousList!.items, addedItem] };
+          });
           setOpenSearchItemModal(false);
         })
         .catch((error) => console.log(error));
@@ -213,9 +214,12 @@ const CreateListArea = () => {
       updateItem({ id: itemToBeReplaced, ...newItem })
         .then((response) => {
           const replacedItem = listItemTypeFormatter(response.data);
-          setAddedItems((previousItems) =>
-            previousItems.map((item) => (item.id === replacedItem.id ? replacedItem : item))
-          );
+          setList((previousList) => {
+            return {
+              ...previousList!,
+              items: previousList!.items.map((item) => (item.id === replacedItem.id ? replacedItem : item)),
+            };
+          });
           setItemToBeReplaced(null);
           setOpenSearchItemModal(false);
         })
@@ -229,9 +233,28 @@ const CreateListArea = () => {
   };
 
   const handleRemoveItemOnClick = (removeItemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    // RESOLVER SE VAI ATUALIZAR A LISTA NO BANCO COMO NÃO PUBLICADA OU NÃO VAI PERMITIR A REMOÇAÕ
+    if (list!.draft === false && list!.items.length < 4) {
+      toast.error("Uma lista publicada não pode ter menos que 3 itens.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+    // SE NÃO FOR PERMITIR A REMOÇÃO AQUI VAI O ELSE
     deleteItem(removeItemId)
       .then((_response) => {
-        setAddedItems((previousItems) => previousItems.filter((item) => item.id !== removeItemId));
+        setList((previousList) => {
+          return {
+            ...previousList!,
+            items: previousList!.items.filter((item) => item.id !== removeItemId),
+          };
+        });
       })
       .catch((error) => console.log(error));
   };
@@ -248,18 +271,21 @@ const CreateListArea = () => {
     updateItem(itemBeingEdited!)
       .then((response) => {
         const editedItem = listItemTypeFormatter(response.data);
-        setAddedItems((previousItems) =>
-          previousItems.map((item) =>
-            item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier ? editedItem : item
-          )
-        );
+        setList((previousList) => {
+          return {
+            ...previousList!,
+            items: previousList!.items.map((item) =>
+              item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier ? editedItem : item
+            ),
+          };
+        });
         setItemBeingEdited(null);
       })
       .catch((error) => console.log(error));
   };
 
   const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
-    if (addedItems.length < 3 && checked) {
+    if (list!.items.length < 3 && checked) {
       toast.warn("Atenção! Uma lista com menos de 3 itens não pode ser publicada.", {
         position: "top-right",
         autoClose: 5000,
@@ -321,7 +347,7 @@ const CreateListArea = () => {
                   <Icons></Icons>
 
                   <CardContent>
-                    {addedItems.map((item, index) => {
+                    {list.items.map((item, index) => {
                       if (item.externalApiIdentifier === itemBeingEdited?.externalApiIdentifier)
                         return (
                           <Card sx={{ display: "flex", mb: 2 }} key={index}>
@@ -497,4 +523,4 @@ const CreateListArea = () => {
     );
 };
 
-export default CreateListArea;
+export default ListEditingArea;
