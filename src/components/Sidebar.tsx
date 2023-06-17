@@ -36,35 +36,40 @@ const Sidebar = () => {
         <Stack direction="column" spacing={1} alignItems={"center"}>
           <Avatar sx={{ bgcolor: stringToColor(loggedUser!.name), width: 160, height: 160 }}></Avatar>
           <Stack sx={{ display: "flex", direction: "row", alignItems: "center" }}>
-            <Typography variant="h5">{loggedUser!.name}</Typography>
-            <Typography>{loggedUser!.email}</Typography>
+            <Typography variant="h5" sx={{ color: "white" }}>
+              {loggedUser!.name}
+            </Typography>
+            <Typography sx={{ color: "white" }}>{loggedUser!.email}</Typography>
           </Stack>
           <List sx={{ mb: 3 }}>
             <Divider sx={{ my: 2 }}></Divider>
 
             <ListItem disablePadding>
               <ListItemIcon>
-                <EventIcon />
+                <EventIcon sx={{ color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary={`Desde ${loggedUser!.createdAt.split(":")[0].split("T")[0]}`} />
+              <ListItemText
+                primary={`Desde ${loggedUser!.createdAt.split(":")[0].split("T")[0]}`}
+                sx={{ color: "white" }}
+              />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
-                <FormatListNumberedIcon />
+                <FormatListNumberedIcon sx={{ color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary={`${loggedUser!.listCount} Listas`} />
+              <ListItemText primary={`${loggedUser!.listCount} Listas`} sx={{ color: "white" }} />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
-                <PeopleIcon />
+                <PeopleIcon sx={{ color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary={`${loggedUser!.followersCount} Seguidores `} />
+              <ListItemText primary={`${loggedUser!.followersCount} Seguidores `} sx={{ color: "white" }} />
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
-                <PeopleIcon />
+                <PeopleIcon sx={{ color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary={`${loggedUser!.followedUsersCount} Seguindo `} />
+              <ListItemText primary={`${loggedUser!.followedUsersCount} Seguindo `} sx={{ color: "white" }} />
             </ListItem>
             <Divider sx={{ mt: 2 }}></Divider>
           </List>
@@ -73,9 +78,9 @@ const Sidebar = () => {
               <Link to="/feed" style={{ textDecoration: "none", color: "black" }}>
                 <ListItemButton>
                   <ListItemIcon>
-                    <HomeIcon />
+                    <HomeIcon sx={{ color: "white" }} />
                   </ListItemIcon>
-                  <ListItemText primary="Feed" />
+                  <ListItemText primary="Feed" sx={{ color: "white" }} />
                 </ListItemButton>
               </Link>
             </ListItem>
@@ -83,9 +88,9 @@ const Sidebar = () => {
               <Link to="/manage-lists" style={{ textDecoration: "none", color: "black" }}>
                 <ListItemButton>
                   <ListItemIcon>
-                    <FormatListNumberedIcon />
+                    <FormatListNumberedIcon sx={{ color: "white" }} />
                   </ListItemIcon>
-                  <ListItemText primary="Minhas Listas" />
+                  <ListItemText primary="Minhas Listas" sx={{ color: "white" }} />
                 </ListItemButton>
               </Link>
             </ListItem>

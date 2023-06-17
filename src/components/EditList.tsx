@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, SyntheticEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import theme from "../theme";
-import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
+import { posterInitialUrl, tmdbMovieType, searchMovieByTitle } from "../services/tmdbApi";
 import {
   completeListType,
   deleteItem,
@@ -22,13 +22,17 @@ import Button from "@mui/material/Button";
 import CardActions from "@mui/material/CardActions";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import SearchIcon from "@mui/icons-material/Search";
 import Paper from "@mui/material/Paper";
 import Modal from "@mui/material/Modal";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
+import SearchIcon from "@mui/icons-material/Search";
 
 const style = {
   position: "absolute" as "absolute",
@@ -48,9 +52,9 @@ const EditList = () => {
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
   const searchTitle = useRef<HTMLInputElement | null>(null);
-  const [chosenItem, setChosenItem] = useState<responseResultType | null>(null);
+  const [chosenItem, setChosenItem] = useState<tmdbMovieType | null>(null);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
-  const [tmdbApiResults, setTmdbApiResults] = useState<responseResultType[]>([]);
+  const [tmdbApiResults, setTmdbApiResults] = useState<tmdbMovieType[]>([]);
   const [publishCheckBox, setPublishCheckBox] = useState(false);
   const [titleBeingEdited, setTitleBeingEdited] = useState("");
   const [openWarningModal, setOpenWarningModal] = useState(false);
@@ -86,7 +90,7 @@ const EditList = () => {
       .catch((error) => console.log(error));
   };
 
-  const handleChoseItemOnClick = (item: responseResultType) => (_e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+  const handleChoseItemOnClick = (item: tmdbMovieType) => (_e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     searchTitle!.current!.value = item.original_title;
     setChosenItem(item);
   };
@@ -244,42 +248,15 @@ const EditList = () => {
                                   onChange={handleUserCommentOnChange}
                                 />
                                 <Stack direction="row" sx={{ display: "flex", justiyContent: "space-between" }}>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                      mt: 1,
-                                      mr: 1,
-                                    }}
-                                    onClick={handleSaveChangesOnClick}
-                                  >
-                                    Salvar
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                      mt: 1,
-                                      mr: 1,
-                                    }}
-                                    onClick={(_e) => setOpenSearchItemModal(true)}
-                                  >
-                                    Substituir
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                      mt: 1,
-                                      mr: 1,
-                                    }}
-                                    onClick={(_e) => setItemInEdit(null)}
-                                  >
-                                    Cancelar
-                                  </Button>
+                                  <IconButton aria-label="save" onClick={handleSaveChangesOnClick}>
+                                    <CheckIcon fontSize="medium" />
+                                  </IconButton>
+                                  <IconButton aria-label="search" onClick={() => setOpenSearchItemModal(true)}>
+                                    <SearchIcon fontSize="medium" />
+                                  </IconButton>
+                                  <IconButton aria-label="cancel" onClick={() => setItemInEdit(null)}>
+                                    <CloseIcon fontSize="medium" />
+                                  </IconButton>
                                 </Stack>
                               </Stack>
                             </CardContent>
@@ -325,30 +302,17 @@ const EditList = () => {
 
                               <Stack direction="column" sx={{ display: "flex", justiyContent: "space-between" }}>
                                 <Typography component="div">{item.userComment}</Typography>
-                                <Stack direction="row" sx={{ display: "flex", justiyContent: "space-between" }}>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      mb: 0,
-                                      mt: 1,
-                                      mr: 1,
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={(_e) => setItemInEdit(item)}
-                                  >
-                                    Editar
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{ mt: 1, bgcolor: theme.palette.secondary.main, color: "white" }}
-                                    onClick={handleRemoveItemOnClick(item.id)}
-                                  >
-                                    Remover
-                                  </Button>
-                                </Stack>
                               </Stack>
                             </CardContent>
+                            <Stack direction="row" sx={{ display: "flex", justiyContent: "space-between" }}>
+                              <IconButton aria-label="edit" onClick={() => setItemInEdit(item)}>
+                                <EditIcon fontSize="medium" />
+                              </IconButton>
+
+                              <IconButton aria-label="delete" onClick={handleRemoveItemOnClick(item.id)}>
+                                <DeleteIcon fontSize="medium" />
+                              </IconButton>
+                            </Stack>
                           </Box>
                           <CardMedia
                             component="img"
@@ -360,34 +324,21 @@ const EditList = () => {
                       );
                   })}
                 </CardContent>
-                <CardActions>
-                  {/* <Link to="/manage-lists" style={{ textDecoration: "none" }}>
-                    <Button
-                      size="small"
-                      sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
-                      onClick={handleSaveEditedListOnClick}
-                    >
-                      Salvar
-                    </Button>
-                  </Link> */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                    <FormControlLabel
-                      control={<Checkbox />}
-                      label="Publicar"
-                      onChange={handlePublishListOnChange}
-                      checked={publishCheckBox}
-                    />
-
-                    <Button
-                      size="small"
-                      sx={{ bgcolor: theme.palette.secondary.main, color: "white" }}
-                      onClick={(_e) => navigate("/manage-lists")}
-                    >
-                      Sair
-                    </Button>
-                  </Box>
-                </CardActions>
+                <CardActions></CardActions>
               </Card>
+
+              <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                <FormControlLabel
+                  control={<Checkbox />}
+                  label="Publicar"
+                  onChange={handlePublishListOnChange}
+                  checked={publishCheckBox}
+                />
+
+                <Button size="small" sx={buttonStyle} onClick={(_e) => navigate("/manage-lists")}>
+                  Sair
+                </Button>
+              </Box>
             </Stack>
           </Box>
           <Modal

@@ -8,9 +8,18 @@ export const Icons = styled(Box)(() => ({
 }));
 
 export const buttonStyle = {
-  bgcolor: theme.palette.secondary.main,
+  bgcolor: theme.palette.primary.main,
   color: "white",
   mr: 1,
+};
+
+const stringAvatar = (name: string) => {
+  return {
+    sx: {
+      bgcolor: stringToColor(name),
+    },
+    children: `${name.split(" ")[0][0]}${name.split(" ")[0][1]}`,
+  };
 };
 
 export const modalBoxStyle = {

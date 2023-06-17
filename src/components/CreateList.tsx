@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useRef, useContext, SyntheticEvent } from "react";
 import { Box, Checkbox, CircularProgress, FormControlLabel, Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { posterInitialUrl, responseResultType, searchMovieByTitle } from "../services/tmdbApi";
+import {
+  posterInitialUrl,
+  tmdbMovieType,
+  searchMovieByTitle,
+  searchPersonByName,
+  searchSeriesByTitle,
+  tmdbSeriesType,
+  tmdbPersonType,
+} from "../services/tmdbApi";
 import Container from "@mui/material/Container";
 import theme from "../theme";
 import Button from "@mui/material/Button";
@@ -10,7 +18,6 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import SearchIcon from "@mui/icons-material/Search";
 import Paper from "@mui/material/Paper";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,6 +27,11 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
 import { UserContext } from "../App";
 import {
   completeListType,
@@ -45,10 +57,16 @@ const style = {
   pb: 3,
 };
 
+type genericTmdbResults = {
+  externalApiIdentifier: string;
+  title: string;
+  imageUrl: string;
+  details: string;
+};
+
 const CreateListArea = () => {
   const [list, setList] = useState<completeListType | null>(null);
   const { id } = useParams();
-  const loggedUser = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,18 +81,21 @@ const CreateListArea = () => {
     }
   }, []);
 
-  const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
   const [addedItems, setAddedItems] = useState<simplifiedListItemType[]>([]);
-  const searchTitle = useRef<HTMLInputElement | null>(null);
-  const [chosenItem, setChosenItem] = useState<responseResultType | boolean>(false);
+  const [chosenItem, setChosenItem] = useState<genericTmdbResults | boolean>(false);
   const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
-  const [apiResults, setApiResults] = useState<responseResultType[]>([]);
-  const [titleBeingEdited, setTitleBeingEdited] = useState("");
 
+  const searchTitle = useRef<HTMLInputElement | null>(null);
+  const [tmdbApiResults, setTmdbApiResults] = useState<genericTmdbResults[]>([]);
+
+  const [titleBeingEdited, setTitleBeingEdited] = useState("");
   const [itemToBeReplaced, setItemToBeReplaced] = useState<number | null>(null);
   const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
-  const [rankCount, setRankCount] = useState(0);
   const [publishCheckBox, setPublishCheckBox] = useState(false);
+
+  const [rankCount, setRankCount] = useState(0);
+
+  const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
   const [openWarningModal, setOpenWarningModal] = useState(false);
 
   // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
@@ -88,33 +109,85 @@ const CreateListArea = () => {
     console.log(e.key);
   };
 
+  const movieTypeToGenericType = (movies: Array<tmdbMovieType>) => {
+    return movies.map((movie) => {
+      return {
+        externalApiIdentifier: String(movie.id),
+        title: movie.original_title,
+        imageUrl: movie.poster_path,
+        details: movie.release_date,
+      };
+    });
+  };
+
+  const seriesTypeToGenericType = (series: Array<tmdbSeriesType>) => {
+    return series.map((item) => {
+      return {
+        externalApiIdentifier: String(item.id),
+        title: item.original_name,
+        imageUrl: item.poster_path,
+        details: item.first_air_date,
+      };
+    });
+  };
+
+  const personTypeToGenericType = (people: Array<tmdbPersonType>) => {
+    return people.map((person) => {
+      return {
+        externalApiIdentifier: String(person.id),
+        title: person.original_name,
+        imageUrl: person.profile_path,
+        details: "",
+      };
+    });
+  };
+
   const handleSearchItemClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const title = searchTitle!.current!.value.trim();
     if (title !== "") {
-      searchMovie(title);
+      const category = list ? list.category.name : "";
+      if (category === "Filmes") searchMovie(title);
+      else if (category === "Séries") searchSeries(title);
+      else if (category === "Pessoas") searchPerson(title);
     }
   };
 
   const searchMovie = (title: string) => {
     searchMovieByTitle(title)
       .then((response) => {
-        setApiResults(response.data.results.map((item) => item));
+        console.log(response.data);
+        setTmdbApiResults(movieTypeToGenericType(response.data.results as Array<tmdbMovieType>));
       })
       .catch((error) => console.log(error));
   };
 
-  const handleChoseItemOnClick = (item: responseResultType) => (_e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
-    searchTitle!.current!.value = item.original_title;
+  const searchSeries = (title: string) => {
+    searchSeriesByTitle(title)
+      .then((response) => {
+        console.log(response.data);
+        setTmdbApiResults(seriesTypeToGenericType(response.data.results as Array<tmdbSeriesType>));
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const searchPerson = (name: string) => {
+    searchPersonByName(name)
+      .then((response) => {
+        console.log(response.data);
+        setTmdbApiResults(personTypeToGenericType(response.data.results as Array<tmdbPersonType>));
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const handleChoseItemOnClick = (item: genericTmdbResults) => (_e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+    searchTitle!.current!.value = item.title;
     setChosenItem(item);
   };
 
-  const apiInputListItemTypeFormatter = (item: responseResultType, comment: string) => {
+  const apiInputListItemTypeFormatter = (item: genericTmdbResults, comment: string) => {
     return {
-      externalApiIdentifier: String(item.id),
-      imageUrl: item.poster_path,
-      details: item.release_date,
+      ...item,
       rank: rankCount,
-      title: item.original_title,
       userComment: comment,
     };
   };
@@ -133,7 +206,7 @@ const CreateListArea = () => {
 
   const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const newItem: postListItemType = apiInputListItemTypeFormatter(
-      chosenItem as responseResultType,
+      chosenItem as genericTmdbResults,
       chosenItemUsertext!.current!.value
     );
     if (itemToBeReplaced === null) {
@@ -230,11 +303,6 @@ const CreateListArea = () => {
     return (
       <>
         <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
-          {/* <Container maxWidth="md">
-          <Typography variant="h3" gutterBottom>
-            Crie uma nova lista!
-          </Typography>
-        </Container> */}
           <Container maxWidth="md">
             <Box sx={{ display: "flex" }}>
               <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
@@ -248,10 +316,6 @@ const CreateListArea = () => {
                   onBlur={handleTitleOnBlur}
                   onChange={handleListTitleOnChange}
                 />
-
-                {/* <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, mb: 2, mr: 1 }}>
-                {list?.category.name}
-              </Typography> */}
 
                 <Card sx={{ minWidth: 275, mt: 3, bgcolor: "white" }}>
                   <Icons></Icons>
@@ -291,26 +355,13 @@ const CreateListArea = () => {
                                     onChange={handleUserCommentOnChange}
                                   />
                                   <Stack direction="row">
-                                    <Button
-                                      size="small"
-                                      sx={{
-                                        bgcolor: theme.palette.secondary.main,
-                                        color: "white",
-                                      }}
-                                      onClick={handleSaveItemEditedOnClick}
-                                    >
-                                      Salvar
-                                    </Button>
-                                    <Button
-                                      size="small"
-                                      sx={{
-                                        bgcolor: theme.palette.secondary.main,
-                                        color: "white",
-                                      }}
-                                      onClick={() => setItemBeingEdited(null)}
-                                    >
-                                      Cancelar
-                                    </Button>
+                                    <IconButton aria-label="edit" onClick={handleSaveItemEditedOnClick}>
+                                      <CheckIcon fontSize="medium" />
+                                    </IconButton>
+
+                                    <IconButton aria-label="edit" onClick={() => setItemBeingEdited(null)}>
+                                      <CloseIcon fontSize="medium" />
+                                    </IconButton>
                                   </Stack>
                                 </Stack>
                               </CardContent>
@@ -348,39 +399,20 @@ const CreateListArea = () => {
                                   </Stack>
                                 </Stack>
                                 <Typography component="div">{item.userComment}</Typography>
-                                <Stack direction="row" spacing={1}>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={(_e) => setItemBeingEdited(item)}
-                                  >
-                                    Editar
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={handleReplaceItemOnClick(item.id)}
-                                  >
-                                    Substituir
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    sx={{
-                                      bgcolor: theme.palette.secondary.main,
-                                      color: "white",
-                                    }}
-                                    onClick={handleRemoveItemOnClick(item.id)}
-                                  >
-                                    Remover
-                                  </Button>
-                                </Stack>
                               </CardContent>
+                              <Stack direction="row" spacing={1}>
+                                <IconButton aria-label="edit" onClick={(_e) => setItemBeingEdited(item)}>
+                                  <EditIcon fontSize="medium" />
+                                </IconButton>
+
+                                <IconButton aria-label="search" onClick={handleReplaceItemOnClick(item.id)}>
+                                  <SearchIcon fontSize="medium" />
+                                </IconButton>
+
+                                <IconButton aria-label="delete" onClick={handleRemoveItemOnClick(item.id)}>
+                                  <DeleteIcon fontSize="medium" />
+                                </IconButton>
+                              </Stack>
                             </Box>
                             <CardMedia
                               component="img"
@@ -435,10 +467,10 @@ const CreateListArea = () => {
                     </IconButton>
                   </Paper>
                   <List sx={{ overflow: "auto", maxHeight: 300 }}>
-                    {apiResults.map((item, index) => (
+                    {tmdbApiResults.map((item, index) => (
                       <ListItem disablePadding onClick={handleChoseItemOnClick(item)} key={index}>
                         <ListItemButton>
-                          <ListItemText primary={item.original_title} />
+                          <ListItemText primary={item.title} />
                         </ListItemButton>
                       </ListItem>
                     ))}

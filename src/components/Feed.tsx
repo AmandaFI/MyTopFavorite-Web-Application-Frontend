@@ -3,7 +3,7 @@ import theme from "../theme";
 import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from "../services/api";
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
-import { Icons } from "../styleHelpers";
+import { Icons, stringToColor } from "../styleHelpers";
 import { Box, Container, IconButton, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -80,7 +80,9 @@ const Feed = () => {
           <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
             <Icons>
               <Box>
-                <Avatar sx={{ mt: 2, ml: 2 }}>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
+                <Avatar
+                  sx={{ mt: 2, ml: 2, bgcolor: stringToColor(list.user.name) }}
+                >{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
                 <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
               </Box>
               <Typography variant="h5" m={2}>
@@ -90,7 +92,7 @@ const Feed = () => {
                 {list.category.name}
               </Box>
             </Icons>
-
+            {/* , border: "3px solid red" */}
             <CardContent>
               {list.items.slice(0, list.shownItems!).map((item) => (
                 <Card sx={{ display: "flex", mb: 2 }} key={item.id}>

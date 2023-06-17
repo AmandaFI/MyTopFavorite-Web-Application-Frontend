@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useContext, useEffect, useState } from "react";
-import { modalBoxStyle } from "../styleHelpers";
+import { buttonStyle, modalBoxStyle } from "../styleHelpers";
 import theme from "../theme";
 import { UserContext } from "../App";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,13 +24,10 @@ import {
   categoryType,
   deleteList,
   simplifiedListType,
-  userLists,
   allCategories,
-  postListType,
   createList,
   userDrafLists,
   userPublishedLists,
-  updateList,
 } from "../services/api";
 
 const ManageLists = () => {
@@ -114,7 +111,7 @@ const ManageLists = () => {
           maxWidth: 200,
           m: 1,
           minHeight: 250,
-          maxHeight: "50%",
+          maxHeight: "25%",
           display: "flex",
           flexDirection: "column",
         }}
@@ -154,7 +151,7 @@ const ManageLists = () => {
           maxWidth: 200,
           m: 1,
           minHeight: 250,
-          maxHeight: "50%",
+          maxHeight: "25%",
           display: "flex",
           flexDirection: "column",
         }}
@@ -194,20 +191,6 @@ const ManageLists = () => {
     <>
       <Box sx={{ display: "flex", flex: 10 }}>
         <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
-          <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"25%"}>
-            <Typography
-              variant="h3"
-              sx={{
-                alignContent: "center",
-                justifyContent: "center",
-                display: "flex",
-                p: 5,
-                color: "white",
-              }}
-            >
-              Bem-vindo {loggedUser!.name}
-            </Typography>
-          </Box>
           <Box
             sx={{
               display: "flex",
@@ -243,7 +226,7 @@ const ManageLists = () => {
                   flexWrap: "wrap",
                 }}
               >
-                <Card sx={{ minWidth: 275, m: 1, maxHeight: "50%", minHeight: 250 }}>
+                <Card sx={{ minWidth: 275, m: 1, maxHeight: "25%", minHeight: 250 }}>
                   <CardContent sx={{ mb: 6 }}>
                     <IconButton size="large" onClick={(_e) => setOpenNewListForm(true)}>
                       <AddCircleOutlineIcon fontSize="large" sx={{ mr: 1 }} />
@@ -288,11 +271,7 @@ const ManageLists = () => {
                     ))}
                   </TextField>
                   <Button
-                    sx={{
-                      bgcolor: theme.palette.secondary.main,
-                      color: "white",
-                      display: "flex",
-                    }}
+                    sx={buttonStyle}
                     disabled={listTitle === ""}
                     onClick={handleCreateListOnClick}
                     fullWidth={true}
@@ -301,10 +280,7 @@ const ManageLists = () => {
                   </Button>
 
                   <Button
-                    sx={{
-                      bgcolor: theme.palette.secondary.main,
-                      color: "white",
-                    }}
+                    sx={buttonStyle}
                     onClick={(_e) => {
                       setOpenNewListForm(false);
                     }}

@@ -80,7 +80,7 @@ export const createUser = (newUser: postUserType) => axios.post<userType>("/user
 export const initialLoadFeed = () => axios.get<Array<completeListType>>("/users/followed_users_lists");
 export const paginationLoadFeed = (pageNumber: number) =>
   axios.get<Array<completeListType>>(`/users/followed_users_lists?page=${pageNumber}&per_page=1`);
-export const searchUserById = (id: number) => axios.get<postUserType>(`/users/${id}`);
+export const searchUserById = (id: number) => axios.get<userType>(`/users/${id}`);
 export const searchUsersByName = (name: string) => axios.post<Array<userType>>("/users/find_users", { name });
 export const followUser = (user_id: number) => axios.post<userType>("/users/follow", { user_id });
 export const unfollowUser = (user_id: number) => axios.delete(`/users/unfollow?user_id=${user_id}`);

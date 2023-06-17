@@ -97,9 +97,7 @@ const Navbar = (props: navbarPropsType) => {
           isOptionEqualToValue={(option, value) => option.name === value.name}
           getOptionLabel={(option) => option.name}
           options={usersFound}
-          renderInput={(params) => (
-            <TextField onChange={handleInputOnChange} value={searchedUser} {...params} label="Procurar usuário" />
-          )}
+          renderInput={(params) => <TextField onChange={handleInputOnChange} value={searchedUser} {...params} />}
         />
         {/* </Search> */}
         <Icons onClick={(_e) => setMenuStatus(true)}>

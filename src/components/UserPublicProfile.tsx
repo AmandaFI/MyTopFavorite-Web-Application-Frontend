@@ -1,5 +1,5 @@
 import theme from "../theme";
-import { Icons } from "../styleHelpers";
+import { Icons, stringToColor } from "../styleHelpers";
 import { useEffect, useState } from "react";
 import {
   Avatar,
@@ -24,12 +24,13 @@ import {
   unfollowUser,
   userPublishedListsPaginated,
   checkFollowingUser,
+  userType,
 } from "../services/api";
 
 export const UserPublicProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [searchedUser, setSearchedUser] = useState<postUserType>();
+  const [searchedUser, setSearchedUser] = useState<userType>();
   const [searchedUserLists, setSearchedUserLists] = useState<Array<completeListType>>([]);
   const [following, setFollowing] = useState(false);
   const [paginationPage, setPaginationPage] = useState(1);
@@ -71,13 +72,42 @@ export const UserPublicProfile = () => {
     <>
       <Box sx={{ display: "flex", flex: 10 }}>
         <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
-          <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"15%"} minHeight={"8%"}>
+          <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }}>
+            <Container maxWidth="lg">
+              <Stack direction="row" spacing={2} sx={{ bgcolor: "#1d232f", ml: 3, mr: 3 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: stringToColor(searchedUser ? searchedUser.name : ""),
+                    width: 120,
+                    height: 120,
+                    m: 5,
+                  }}
+                ></Avatar>
+                <Stack direction="column" spacing={2}>
+                  <Typography component="div" variant="h5" sx={{ color: "white", mt: 5 }}>
+                    {searchedUser ? searchedUser.name : ""}
+                  </Typography>
+                  <Box sx={{ color: "white" }}>
+                    {searchedUser ? `${searchedUser.followedUsersCount} Seguidores` : ""}
+                  </Box>
+                  <Button
+                    size="small"
+                    sx={{ color: "white", backgroundColor: theme.palette.primary.main, maxWidth: 150 }}
+                    onClick={handleFollowUserOnCLick}
+                  >
+                    {following ? "Deixar de seguir" : "Seguir"}
+                  </Button>
+                </Stack>
+              </Stack>
+            </Container>
+          </Box>
+          {/* <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"15%"} minHeight={"8%"}>
             <Stack direction="row">
               <Button size="medium" sx={{ color: "black", backgroundColor: "white" }} onClick={handleFollowUserOnCLick}>
                 {following ? "Deixar de seguir" : "Seguir"}
               </Button>
             </Stack>
-          </Box>
+          </Box> */}
           <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
             <Container maxWidth="lg">
               {searchedUserLists.map((list) => (
