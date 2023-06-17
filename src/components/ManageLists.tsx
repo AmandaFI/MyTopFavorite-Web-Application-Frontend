@@ -80,6 +80,7 @@ const ManageLists = () => {
 
   const handleEditListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     navigate(`/edit-list/${listId}`);
+    // navigate(`/create-list/${listId}`);
   };
 
   const handleListCategoryOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -32,7 +32,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
-import { UserContext } from "../App";
+
+// https://fkhadra.github.io/react-toastify/introduction
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   completeListType,
   deleteItem,
@@ -44,18 +47,6 @@ import {
   updateList,
 } from "../services/api";
 import { Icons, buttonStyle, modalBoxStyle } from "../styleHelpers";
-
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  pt: 2,
-  px: 4,
-  pb: 3,
-};
 
 type genericTmdbResults = {
   externalApiIdentifier: string;
@@ -96,7 +87,6 @@ const CreateListArea = () => {
   const [rankCount, setRankCount] = useState(0);
 
   const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
-  const [openWarningModal, setOpenWarningModal] = useState(false);
 
   // FUNÇÃO PROCURAR COM ENTER COM PROBLEMAS
   const handleItemSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -270,7 +260,16 @@ const CreateListArea = () => {
 
   const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
     if (addedItems.length < 3 && checked) {
-      setOpenWarningModal(true);
+      toast.warn("Atenção! Uma lista com menos de 3 itens não pode ser publicada.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } else if (checked) {
       updateList(list!.id, { draft: false })
         .then((_response) => {
@@ -302,6 +301,7 @@ const CreateListArea = () => {
   else
     return (
       <>
+        <ToastContainer />
         <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
           <Container maxWidth="md">
             <Box sx={{ display: "flex" }}>
@@ -489,13 +489,6 @@ const CreateListArea = () => {
                     Cancelar
                   </Button>
                 </Stack>
-              </Box>
-            </Modal>
-            <Modal open={openWarningModal} onClose={() => setOpenWarningModal(false)}>
-              <Box sx={{ ...style, width: 200 }}>
-                <h2 id="child-modal-title">Aviso</h2>
-                <p id="child-modal-description">Uma lista com menos de 3 itens não pode ser publicada.</p>
-                <Button onClick={() => setOpenWarningModal(false)}>Ok</Button>
               </Box>
             </Modal>
           </Container>

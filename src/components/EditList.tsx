@@ -15,7 +15,6 @@ import { Box, Checkbox, FormControlLabel, Stack, TextField } from "@mui/material
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Avatar from "@mui/material/Avatar";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -33,6 +32,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import SearchIcon from "@mui/icons-material/Search";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const style = {
   position: "absolute" as "absolute",
@@ -57,7 +59,6 @@ const EditList = () => {
   const [tmdbApiResults, setTmdbApiResults] = useState<tmdbMovieType[]>([]);
   const [publishCheckBox, setPublishCheckBox] = useState(false);
   const [titleBeingEdited, setTitleBeingEdited] = useState("");
-  const [openWarningModal, setOpenWarningModal] = useState(false);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -156,8 +157,17 @@ const EditList = () => {
   };
 
   const handleRemoveItemOnClick = (itemId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (listInEdit!.items.length < 4) {
-      window.alert("Lista precisa ter no mínimo 3 items.");
+    if (listInEdit!.draft === false && listInEdit!.items.length < 4) {
+      toast.error("Uma lista publicada não pode ter menos que 3 itens.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } else {
       deleteItem(itemId)
         .then((_response) => {
@@ -181,7 +191,16 @@ const EditList = () => {
 
   const handlePublishListOnChange = (_e: SyntheticEvent<Element, Event>, checked: boolean) => {
     if (listInEdit!.items.length < 3 && checked) {
-      setOpenWarningModal(true);
+      toast.warn("Atenção! Uma lista com menos de 3 itens não pode ser publicada.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       setPublishCheckBox(false);
     } else {
       updateList(+id!, { draft: !checked })
@@ -197,6 +216,7 @@ const EditList = () => {
 
   return (
     <>
+      <ToastContainer />
       <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
         <Container maxWidth="md">
           <Box sx={{ display: "flex" }}>
@@ -381,13 +401,6 @@ const EditList = () => {
                   Cancelar
                 </Button>
               </Stack>
-            </Box>
-          </Modal>
-          <Modal open={openWarningModal} onClose={() => setOpenWarningModal(false)}>
-            <Box sx={{ ...style, width: 200 }}>
-              <h2 id="child-modal-title">Aviso</h2>
-              <p id="child-modal-description">Uma lista com menos de 3 itens não pode ser publicada.</p>
-              <Button onClick={() => setOpenWarningModal(false)}>Ok</Button>
             </Box>
           </Modal>
         </Container>
