@@ -41,9 +41,10 @@ export type tmdbPersonType = {
   original_name: string;
   popularity: number;
   profile_path: string;
+  user_input_text?: string;
 };
 
-type tmdbResponseType = {
+export type tmdbResponseType = {
   page: number;
   results: tmdbMovieType[] | tmdbSeriesType[] | tmdbPersonType[];
   total_pages: number;

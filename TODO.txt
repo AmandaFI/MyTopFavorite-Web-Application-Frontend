@@ -2,19 +2,17 @@ AGORA
 
 -- em locais necessários, mostrar um toast quando deui erro no servidor (exemplo criar ou atualizar uma lista)
 -- paginar itens de uma lista
--- mostar respostas do tmdb em tabela 
+-- arrumar banco de daos para so ter as 3 categorias e criar alguns usuarios e listas para mostrar
 
 -- limpar autocomplete apos pesquisar usario
 
 
 -- Melhorar apresentação das informações na sidebar
--- Exibir resultados da busca do tmdb em tabela e não lista
 -- tratar melhor not null assertions
 
 
 
 DESIGN:
--- Incluindo o poster do filme na tabela
 -- Alguns botões somem no hover (cor igual a cor de fundo e texto)
 -- mudar curosr ao clicar no logo 
 
