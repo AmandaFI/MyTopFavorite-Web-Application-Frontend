@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Feed from "./components/Feed";
 import UserPrivateArea from "./components/UserPrivateArea";
-import { UserPublicProfile } from "./components/UserPublicProfile";
+import UserPublicProfile from "./components/UserPublicProfile";
 import { Box, Stack } from "@mui/material";
 
 export const UserContext = createContext<userType | null>(null);

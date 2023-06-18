@@ -1,14 +1,16 @@
 AGORA
 
+-- em locais necessários, mostrar um toast quando deui erro no servidor (exemplo criar ou atualizar uma lista)
+-- paginar itens de uma lista
+-- mostar respostas do tmdb em tabela 
+
 -- limpar autocomplete apos pesquisar usario
 
 
--- Tratar caso de quando já segue ou já deu like em uma lista, não pode fazer isso mais de uma vez
--- consertar like no botão, não esta renderizando com o novo like
 -- Melhorar apresentação das informações na sidebar
 -- Exibir resultados da busca do tmdb em tabela e não lista
 -- tratar melhor not null assertions
--- tratei o not null assertion
+
 
 
 DESIGN:
@@ -21,11 +23,9 @@ COMPONENTS
 
 
 FUNCIONALIDADES
--- Ao clicar em um card de uma lista no feed, ser possível ler mais informações sobre o item
--- Ao clicar no em uma lista, abri-la inteira em outra página
+
 -- Paginar itens da lista, ao clicar em ver mais exibir alguns items não todos
 
 PROBLEMAS ATUAIS
 
-- Depois de um like, indicar que a lista já foi liked e mudar o botão para dislike
 

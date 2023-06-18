@@ -24,10 +24,16 @@ import {
   userPublishedListsPaginated,
   checkFollowingUser,
   userType,
+  likeList,
+  dislikeList,
 } from "../services/api";
 import AddIcon from "@mui/icons-material/Add";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 
-export const UserPublicProfile = () => {
+const SHOWN_ITEMS_PER_LIST = 3;
+
+const UserPublicProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchedUser, setSearchedUser] = useState<userType>();
@@ -38,16 +44,17 @@ export const UserPublicProfile = () => {
   useEffect(() => {
     if (id === undefined) navigate("/feed");
     else {
+      setPaginationPage(1);
       searchUserById(+id)
         .then((response) => {
-          console.log("carregando listas");
           setSearchedUser(response.data);
-          userPublishedListsPaginated(+id!, paginationPage).then((response) => {
+          userPublishedListsPaginated(+id!, 1).then((response) => {
             setSearchedUserLists(response.data as completeListType[]);
             setPaginationPage((previousPage) => previousPage + 1);
           });
         })
         .catch((error) => console.log(error));
+
       checkFollowingUser(+id)
         .then((_response) => {
           setFollowing(true);
@@ -77,6 +84,35 @@ export const UserPublicProfile = () => {
       });
     }
   };
+
+  const handleLikeListOnClick =
+    (currentList: completeListType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (currentList.likedByCurrentUser! === false) {
+        likeList(currentList.id)
+          .then((_response) => {
+            setSearchedUserLists((previousLists) =>
+              previousLists.map((list) =>
+                list.id === currentList.id
+                  ? { ...list, likersCount: list.likersCount + 1, likedByCurrentUser: true }
+                  : list
+              )
+            );
+          })
+          .catch((error) => console.log(error));
+      } else {
+        dislikeList(currentList.id)
+          .then((_response) =>
+            setSearchedUserLists((previousLists) =>
+              previousLists.map((list) =>
+                list.id === currentList.id
+                  ? { ...list, likersCount: list.likersCount - 1, likedByCurrentUser: false }
+                  : list
+              )
+            )
+          )
+          .catch((error) => console.log(error));
+      }
+    };
 
   return (
     <>
@@ -111,20 +147,15 @@ export const UserPublicProfile = () => {
               </Stack>
             </Container>
           </Box>
-          {/* <Box flex={8} bgcolor={theme.palette.secondary.main} maxHeight={"15%"} minHeight={"8%"}>
-            <Stack direction="row">
-              <Button size="medium" sx={{ color: "black", backgroundColor: "white" }} onClick={handleFollowUserOnCLick}>
-                {following ? "Deixar de seguir" : "Seguir"}
-              </Button>
-            </Stack>
-          </Box> */}
           <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
             <Container maxWidth="lg">
               {searchedUserLists.map((list) => (
                 <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
                   <Icons>
                     <Box>
-                      <Avatar sx={{ mt: 2, ml: 2 }}>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
+                      <Avatar
+                        sx={{ mt: 2, ml: 2, bgcolor: stringToColor(list.user.name) }}
+                      >{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
                       <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
                     </Box>
                     <Typography variant="h5" m={2}>
@@ -136,34 +167,37 @@ export const UserPublicProfile = () => {
                   </Icons>
 
                   <CardContent>
-                    {list.items.slice(0, list.shownItems!).map((item) => (
-                      <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
-                        <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
-                          <CardContent sx={{ flex: "1 0 auto" }}>
-                            <Stack direction="row" spacing={2}>
-                              <Typography component="div" variant="h3">
-                                {item.rank}
-                              </Typography>
-                              <Stack direction="column">
-                                <Typography component="div" variant="h5">
-                                  {item.title}
+                    {list.items
+                      .sort((a, b) => a.rank - b.rank)
+                      .slice(0, list.shownItems!)
+                      .map((item) => (
+                        <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
+                          <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+                            <CardContent sx={{ flex: "1 0 auto" }}>
+                              <Stack direction="row" spacing={2}>
+                                <Typography component="div" variant="h3">
+                                  {item.rank}
                                 </Typography>
-                                <Typography variant="subtitle1" color="text.secondary" component="div">
-                                  {item.details}
-                                </Typography>
+                                <Stack direction="column">
+                                  <Typography component="div" variant="h5">
+                                    {item.title}
+                                  </Typography>
+                                  <Typography variant="subtitle1" color="text.secondary" component="div">
+                                    {item.details}
+                                  </Typography>
+                                </Stack>
                               </Stack>
-                            </Stack>
-                            <Typography component="div">{item.userComment}</Typography>
-                          </CardContent>
-                        </Box>
-                        <CardMedia
-                          component="img"
-                          sx={{ width: 151, flex: 1 }}
-                          src={`${posterInitialUrl}${item.imageUrl}`}
-                          alt={item.title}
-                        />
-                      </Card>
-                    ))}
+                              <Typography component="div">{item.userComment}</Typography>
+                            </CardContent>
+                          </Box>
+                          <CardMedia
+                            component="img"
+                            sx={{ width: 151, flex: 1 }}
+                            src={`${posterInitialUrl}${item.imageUrl}`}
+                            alt={item.title}
+                          />
+                        </Card>
+                      ))}
                   </CardContent>
                   <CardActions>
                     {/* <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
@@ -180,12 +214,26 @@ export const UserPublicProfile = () => {
               </Card>
             ))}
             <Button size="small" sx={{ color: "black" }} onClick={handleLoadMoreListsOnClick}> */}
-                    <Button size="small" sx={{ color: "black" }}>
-                      Like
-                    </Button>
+
+                    <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
+                      {list.likedByCurrentUser ? (
+                        <ThumbUpAltIcon fontSize="large" />
+                      ) : (
+                        <ThumbUpOffAltIcon fontSize="large" />
+                      )}
+                    </IconButton>
                     <Button size="small" sx={{ color: "black" }}>
                       Ver mais
                     </Button>
+                    {/* <IconButton aria-label="add" size="small" sx={{ color: "black" }}>
+                      {list.items.length - 1 > list.shownItems! ? (
+                        <KeyboardArrowDownIcon fontSize="medium" />
+                      ) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+                        ""
+                      ) : (
+                        <KeyboardArrowUpIcon fontSize="medium" />
+                      )}
+                    </IconButton> */}
                   </CardActions>
                 </Card>
               ))}
@@ -201,3 +249,5 @@ export const UserPublicProfile = () => {
     </>
   );
 };
+
+export default UserPublicProfile;

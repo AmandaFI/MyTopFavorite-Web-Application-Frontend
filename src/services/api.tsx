@@ -56,6 +56,7 @@ export type completeListType = {
   user: userType;
   items: Array<simplifiedListItemType>;
   shownItems?: number;
+  likedByCurrentUser?: boolean;
 };
 
 export type simplifiedListType = Omit<completeListType, "user" | "items" | "shownItems">;
@@ -98,6 +99,8 @@ export const deleteList = (listId: number) => axios.delete<Array<simplifiedListT
 export const createList = (title: string, category_id: number) =>
   axios.post<simplifiedListType>("/lists", { title, category_id });
 export const likeList = (id: number) => axios.post<userType>(`/lists/${id}/like`);
+export const dislikeList = (id: number) => axios.delete(`/lists/${id}/dislike`);
+
 export const getSingleList = (id: number) => axios.get<completeListType>(`/lists/${id}`);
 export const updateList = (id: number, list: putListType) => axios.put<simplifiedListType>(`/lists/${id}`, list);
 

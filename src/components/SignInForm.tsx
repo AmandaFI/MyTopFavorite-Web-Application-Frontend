@@ -29,7 +29,7 @@ const Copyright = (props: any) => {
   );
 };
 
-export default function SignInForm(props: signInFormProps) {
+const SignInForm = (props: signInFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitButtonInactive, setSubmitButtonInactive] = useState(false);
@@ -107,11 +107,11 @@ export default function SignInForm(props: signInFormProps) {
               Entrar
             </Button>
             <Grid container>
-              <Grid item xs>
+              {/* <Grid item xs>
                 <Link to="/signup" style={{ textDecoration: "none", color: theme.palette.primary.main }}>
                   Esqueci minha senha
                 </Link>
-              </Grid>
+              </Grid> */}
               <Grid
                 item
                 onClick={(_e) => {
@@ -127,4 +127,6 @@ export default function SignInForm(props: signInFormProps) {
       </Container>
     </ThemeProvider>
   );
-}
+};
+
+export default SignInForm;

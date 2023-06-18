@@ -27,7 +27,7 @@ export type signUpFormPropsType = {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function SignUpForm(props: signUpFormPropsType) {
+const SignUpForm = (props: signUpFormPropsType) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -127,4 +127,6 @@ export default function SignUpForm(props: signUpFormPropsType) {
       </Container>
     </ThemeProvider>
   );
-}
+};
+
+export default SignUpForm;

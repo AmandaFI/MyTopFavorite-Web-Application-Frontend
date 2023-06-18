@@ -1,6 +1,6 @@
 import * as React from "react";
 import theme from "../theme";
-import { completeListType, likeList, initialLoadFeed, paginationLoadFeed } from "../services/api";
+import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislikeList } from "../services/api";
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons, stringToColor } from "../styleHelpers";
@@ -16,7 +16,6 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import StarOutlineIcon from "@mui/icons-material/StarOutline";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 
@@ -68,15 +67,34 @@ const Feed = () => {
     });
   };
 
-  const handleLikeListOnClick = (id: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    likeList(id)
-      .then((_response) => {
-        setFeedContent((previousLists) =>
-          previousLists.filter((list) => (list.id === id ? { ...list, likersCount: list.likersCount + 1 } : list))
-        );
-      })
-      .catch((error) => console.log(error));
-  };
+  const handleLikeListOnClick =
+    (currentList: completeListType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (currentList.likedByCurrentUser! === false) {
+        likeList(currentList.id)
+          .then((_response) => {
+            setFeedContent((previousLists) =>
+              previousLists.map((list) =>
+                list.id === currentList.id
+                  ? { ...list, likersCount: list.likersCount + 1, likedByCurrentUser: true }
+                  : list
+              )
+            );
+          })
+          .catch((error) => console.log(error));
+      } else {
+        dislikeList(currentList.id)
+          .then((_response) =>
+            setFeedContent((previousLists) =>
+              previousLists.map((list) =>
+                list.id === currentList.id
+                  ? { ...list, likersCount: list.likersCount - 1, likedByCurrentUser: false }
+                  : list
+              )
+            )
+          )
+          .catch((error) => console.log(error));
+      }
+    };
 
   return (
     <Box flex={10} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
@@ -99,46 +117,41 @@ const Feed = () => {
             </Icons>
             {/* , border: "3px solid red" */}
             <CardContent>
-              {list.items.slice(0, list.shownItems!).map((item) => (
-                <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
-                  <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
-                    <CardContent sx={{ flex: "1 0 auto" }}>
-                      <Stack direction="row" spacing={2}>
-                        <Typography component="div" variant="h3">
-                          {item.rank}
-                        </Typography>
-                        <Stack direction="column">
-                          <Typography component="div" variant="h5">
-                            {item.title}
+              {list.items
+                .sort((a, b) => a.rank - b.rank)
+                .slice(0, list.shownItems!)
+                .map((item) => (
+                  <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
+                    <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+                      <CardContent sx={{ flex: "1 0 auto" }}>
+                        <Stack direction="row" spacing={2}>
+                          <Typography component="div" variant="h3">
+                            {item.rank}
                           </Typography>
-                          <Typography variant="subtitle1" color="text.secondary" component="div">
-                            {item.details}
-                          </Typography>
+                          <Stack direction="column">
+                            <Typography component="div" variant="h5">
+                              {item.title}
+                            </Typography>
+                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                              {item.details}
+                            </Typography>
+                          </Stack>
                         </Stack>
-                      </Stack>
-                      <Typography component="div">{item.userComment}</Typography>
-                    </CardContent>
-                  </Box>
-                  <CardMedia
-                    component="img"
-                    sx={{ width: 151, flex: 1 }}
-                    src={`${posterInitialUrl}${item.imageUrl}`}
-                    alt={item.title}
-                  />
-                </Card>
-              ))}
+                        <Typography component="div">{item.userComment}</Typography>
+                      </CardContent>
+                    </Box>
+                    <CardMedia
+                      component="img"
+                      sx={{ width: 151, flex: 1 }}
+                      src={`${posterInitialUrl}${item.imageUrl}`}
+                      alt={item.title}
+                    />
+                  </Card>
+                ))}
             </CardContent>
             <CardActions>
-              {/* <Button size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
-                {list.likersCount} Like
-              </Button> */}
-              {/* // Mudar para mostara like ou deslike */}
-              <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list.id)}>
-                {list.items.length - 1 > list.shownItems! ? (
-                  <ThumbUpOffAltIcon fontSize="large" />
-                ) : (
-                  <ThumbUpAltIcon fontSize="large" />
-                )}
+              <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
+                {list.likedByCurrentUser ? <ThumbUpAltIcon fontSize="large" /> : <ThumbUpOffAltIcon fontSize="large" />}
               </IconButton>
               <IconButton
                 aria-label="add"

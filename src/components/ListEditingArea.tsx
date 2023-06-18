@@ -329,7 +329,6 @@ const ListEditingArea = () => {
       .then(() => {
         updateItem({ rank: sourceIndex + 1 }, list!.items[destinationIndex].id)
           .then(() => {
-            console.log("updated");
             setList((previousList) => {
               return {
                 ...previousList!,

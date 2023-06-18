@@ -55,6 +55,7 @@ const Navbar = (props: navbarPropsType) => {
   };
 
   const handleSelectUserOnChange = (_e: React.SyntheticEvent<Element, Event>, value: userType | null) => {
+    setSearchedUser("");
     navigate(`/user-profile/${value!.id}`);
   };
 
@@ -66,6 +67,8 @@ const Navbar = (props: navbarPropsType) => {
         </Typography>
         <Autocomplete
           id="combo-box-search-user"
+          clearOnBlur={true}
+          noOptionsText={"Pesquisar usuário"}
           sx={{ width: "40%", backgroundColor: "white" }}
           open={open}
           onOpen={() => {

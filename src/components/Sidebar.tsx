@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import { UserContext } from "../App";
 import { Link } from "react-router-dom";
 import { stringToColor } from "../styleHelpers";
+import GroupsIcon from "@mui/icons-material/Groups";
 
 const Sidebar = () => {
   const loggedUser = useContext(UserContext);
@@ -61,7 +62,7 @@ const Sidebar = () => {
             </ListItem>
             <ListItem disablePadding>
               <ListItemIcon>
-                <PeopleIcon sx={{ color: "white" }} />
+                <GroupsIcon sx={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary={`${loggedUser!.followersCount} Seguidores `} sx={{ color: "white" }} />
             </ListItem>
