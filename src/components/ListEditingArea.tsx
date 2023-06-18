@@ -64,7 +64,7 @@ type genericTmdbResults = {
   details: string;
 };
 
-const ListEditingArea = () => {
+export const ListEditingArea = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -116,7 +116,11 @@ const ListEditingArea = () => {
           setPublishCheckBox(!response.data.draft);
           setRankCount(response.data.items.length);
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Lista não encontrada.", {
+            ...baseToast,
+          })
+        );
     }
   }, []);
 
@@ -284,7 +288,11 @@ const ListEditingArea = () => {
           ]);
         else setTmdbApiResults(formatToGenericType(response.data.results as Array<tmdbResultType>));
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao buscar item.", {
+          ...baseToast,
+        })
+      );
   };
 
   // --------------------------------------------------------------------------------------------------------
@@ -331,7 +339,11 @@ const ListEditingArea = () => {
           });
           setOpenSearchItemModal(false);
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Erro ao salvar item.", {
+            ...baseToast,
+          })
+        );
     } else {
       updateItem(newItem, itemBeingEdited.id)
         .then((response) => {
@@ -345,7 +357,11 @@ const ListEditingArea = () => {
           setItemBeingEdited(null);
           setOpenSearchItemModal(false);
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Erro ao atualizar item.", {
+            ...baseToast,
+          })
+        );
     }
   };
 
@@ -387,7 +403,11 @@ const ListEditingArea = () => {
             });
           }
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Erro ao deletar item.", {
+            ...baseToast,
+          })
+        );
     };
 
   const handleUserCommentOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -428,7 +448,11 @@ const ListEditingArea = () => {
           });
           setPublishCheckBox(true);
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Erro ao publicar lista.", {
+            ...baseToast,
+          })
+        );
     } else setPublishCheckBox(false);
   };
 
@@ -459,9 +483,17 @@ const ListEditingArea = () => {
               };
             });
           })
-          .catch((error) => console.log(error));
+          .catch((_error) =>
+            toast.error("Erro ao atualizar lista.", {
+              ...baseToast,
+            })
+          );
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao atualizar lista.", {
+          ...baseToast,
+        })
+      );
   };
   const handleItemSelectedRowClick = (
     params: GridRowParams,
@@ -475,6 +507,7 @@ const ListEditingArea = () => {
   if (list === null)
     return (
       <Box sx={{ display: "flex", flex: 10, bgcolor: theme.palette.primary.dark }}>
+        <ToastContainer />
         <Container maxWidth="md">
           <CircularProgress />
         </Container>
@@ -725,5 +758,3 @@ const ListEditingArea = () => {
       </>
     );
 };
-
-export default ListEditingArea;

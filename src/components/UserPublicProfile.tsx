@@ -1,6 +1,13 @@
 import theme from "../theme";
-import { Icons, stringToColor } from "../styleHelpers";
+import { Icons, baseToast, stringToColor } from "../styleHelpers";
 import { useEffect, useState } from "react";
+import { posterInitialUrl } from "../services/tmdbApi";
+import { useNavigate, useParams } from "react-router-dom";
+import AddIcon from "@mui/icons-material/Add";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Avatar,
   Box,
@@ -14,8 +21,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { posterInitialUrl } from "../services/tmdbApi";
-import { useNavigate, useParams } from "react-router-dom";
 import {
   completeListType,
   searchUserById,
@@ -27,13 +32,10 @@ import {
   likeList,
   dislikeList,
 } from "../services/api";
-import AddIcon from "@mui/icons-material/Add";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
-import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 
 const SHOWN_ITEMS_PER_LIST = 3;
 
-const UserPublicProfile = () => {
+export const UserPublicProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchedUser, setSearchedUser] = useState<userType>();
@@ -53,7 +55,11 @@ const UserPublicProfile = () => {
             setPaginationPage((previousPage) => previousPage + 1);
           });
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Usuário não encontrado.", {
+            ...baseToast,
+          })
+        );
 
       checkFollowingUser(+id)
         .then((_response) => {
@@ -78,10 +84,16 @@ const UserPublicProfile = () => {
   const handleLoadMoreListsOnClick = () => {
     if (id === undefined) navigate("/feed");
     else {
-      userPublishedListsPaginated(+id, paginationPage).then((response) => {
-        setSearchedUserLists((previousLists) => [...previousLists, ...(response.data as completeListType[])]);
-        setPaginationPage((previousPage) => previousPage + 1);
-      });
+      userPublishedListsPaginated(+id, paginationPage)
+        .then((response) => {
+          setSearchedUserLists((previousLists) => [...previousLists, ...(response.data as completeListType[])]);
+          setPaginationPage((previousPage) => previousPage + 1);
+        })
+        .catch((_error) =>
+          toast.error("Erro ao carregar mais listas.", {
+            ...baseToast,
+          })
+        );
     }
   };
 
@@ -116,6 +128,7 @@ const UserPublicProfile = () => {
 
   return (
     <>
+      <ToastContainer />
       <Box sx={{ display: "flex", flex: 10 }}>
         <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
           <Box flex={8} sx={{ bgcolor: theme.palette.primary.dark }}>
@@ -222,9 +235,9 @@ const UserPublicProfile = () => {
                         <ThumbUpOffAltIcon fontSize="large" />
                       )}
                     </IconButton>
-                    <Button size="small" sx={{ color: "black" }}>
+                    {/* <Button size="small" sx={{ color: "black" }}>
                       Ver mais
-                    </Button>
+                    </Button> */}
                     {/* <IconButton aria-label="add" size="small" sx={{ color: "black" }}>
                       {list.items.length - 1 > list.shownItems! ? (
                         <KeyboardArrowDownIcon fontSize="medium" />
@@ -249,5 +262,3 @@ const UserPublicProfile = () => {
     </>
   );
 };
-
-export default UserPublicProfile;

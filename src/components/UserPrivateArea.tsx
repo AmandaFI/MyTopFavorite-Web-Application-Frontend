@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useContext, useEffect, useState } from "react";
-import { buttonStyle, modalBoxStyle } from "../styleHelpers";
+import { baseToast, buttonStyle, modalBoxStyle } from "../styleHelpers";
 import theme from "../theme";
 import { UserContext } from "../App";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Tabs from "@mui/material/Tabs";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Tab from "@mui/material/Tab";
 import {
   categoryType,
@@ -30,7 +32,7 @@ import {
   userPublishedLists,
 } from "../services/api";
 
-const UserPrivateArea = () => {
+export const UserPrivateArea = () => {
   const navigate = useNavigate();
   const loggedUser = useContext(UserContext);
 
@@ -49,16 +51,22 @@ const UserPrivateArea = () => {
     userDrafLists()
       .then((response) => {
         setLoggedUserDrafLists(response.data);
-        console.log(response.data);
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao carregar listas não publicadas.", {
+          ...baseToast,
+        })
+      );
 
     userPublishedLists(loggedUser!.id)
       .then((response) => {
         setLoggedUserPublishedLists(response.data);
-        console.log(response.data);
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao carregar listas publicadas.", {
+          ...baseToast,
+        })
+      );
 
     allCategories()
       .then((response) => {
@@ -75,7 +83,11 @@ const UserPrivateArea = () => {
           if (draft) setLoggedUserDrafLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
           else setLoggedUserPublishedLists((previousItems) => previousItems!.filter((item) => item!.id !== listId));
         })
-        .catch((error) => console.log(error));
+        .catch((_error) =>
+          toast.error("Erro ao deletar lista.", {
+            ...baseToast,
+          })
+        );
     };
 
   const handleEditListOnClick = (listId: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -95,7 +107,11 @@ const UserPrivateArea = () => {
         setOpenNewListForm(false);
         navigate(`/edit-list/${response.data.id}`);
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao criar lista.", {
+          ...baseToast,
+        })
+      );
   };
 
   const handleTabOnChange = (_e: React.SyntheticEvent, newTab: tabs) => {
@@ -189,6 +205,7 @@ const UserPrivateArea = () => {
 
   return (
     <>
+      <ToastContainer />
       <Box sx={{ display: "flex", flex: 10 }}>
         <Stack direction="column" display={"flex"} flex={8} minHeight={"100vh"}>
           <Box
@@ -296,5 +313,3 @@ const UserPrivateArea = () => {
     </>
   );
 };
-
-export default UserPrivateArea;

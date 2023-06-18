@@ -30,7 +30,7 @@ export type navbarPropsType = {
   setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
 };
 
-const Navbar = (props: navbarPropsType) => {
+export const Navbar = (props: navbarPropsType) => {
   const [menuStatus, setMenuStatus] = useState(false);
   const [open, setOpen] = useState(false);
   const [usersFound, setUsersFound] = useState<Array<userType>>([]);
@@ -107,5 +107,3 @@ const Navbar = (props: navbarPropsType) => {
     </AppBar>
   );
 };
-
-export default Navbar;

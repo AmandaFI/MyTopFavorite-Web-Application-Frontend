@@ -3,25 +3,25 @@ import theme from "../theme";
 import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislikeList } from "../services/api";
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
-import { Icons, stringToColor } from "../styleHelpers";
+import { Icons, baseToast, stringToColor } from "../styleHelpers";
 import { Box, Container, IconButton, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
-const Feed = () => {
+export const Feed = () => {
   const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
   const [databasePage, setDatabasePage] = useState(1);
 
@@ -41,7 +41,11 @@ const Feed = () => {
         setFeedContent(preProcessListsForFeed(response.data));
         setDatabasePage((previousValue) => previousValue + 1);
       })
-      .catch((error) => console.log(error));
+      .catch((_error) =>
+        toast.error("Erro ao carregar o feed.", {
+          ...baseToast,
+        })
+      );
   }, []);
 
   const handleShowMoreOnClick = (listIndex: number) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -61,10 +65,16 @@ const Feed = () => {
   };
 
   const handleLoadMoreListsOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    paginationLoadFeed(databasePage).then((response) => {
-      setFeedContent((previousLists) => [...previousLists, ...preProcessListsForFeed(response.data)]);
-      setDatabasePage((previousValue) => previousValue + 1);
-    });
+    paginationLoadFeed(databasePage)
+      .then((response) => {
+        setFeedContent((previousLists) => [...previousLists, ...preProcessListsForFeed(response.data)]);
+        setDatabasePage((previousValue) => previousValue + 1);
+      })
+      .catch((_error) =>
+        toast.error("Erro ao carregar mais listas.", {
+          ...baseToast,
+        })
+      );
   };
 
   const handleLikeListOnClick =
@@ -97,87 +107,92 @@ const Feed = () => {
     };
 
   return (
-    <Box flex={10} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
-      <Container maxWidth="lg">
-        {feedContent.map((list, listIndex) => (
-          <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
-            <Icons>
-              <Box>
-                <Avatar
-                  sx={{ mt: 2, ml: 2, bgcolor: stringToColor(list.user.name) }}
-                >{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
-                <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
-              </Box>
-              <Typography variant="h5" m={2}>
-                {list.title}
-              </Typography>
-              <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
-                {list.category.name}
-              </Box>
-            </Icons>
-            {/* , border: "3px solid red" */}
-            <CardContent>
-              {list.items
-                .sort((a, b) => a.rank - b.rank)
-                .slice(0, list.shownItems!)
-                .map((item) => (
-                  <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
-                    <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
-                      <CardContent sx={{ flex: "1 0 auto" }}>
-                        <Stack direction="row" spacing={2}>
-                          <Typography component="div" variant="h3">
-                            {item.rank}
-                          </Typography>
-                          <Stack direction="column">
-                            <Typography component="div" variant="h5">
-                              {item.title}
+    <>
+      <ToastContainer />
+      <Box flex={10} sx={{ bgcolor: theme.palette.primary.dark }} p={2}>
+        <Container maxWidth="lg">
+          {feedContent.map((list, listIndex) => (
+            <Card sx={{ minWidth: 275, m: 3, bgcolor: "white" }} key={list.id}>
+              <Icons>
+                <Box>
+                  <Avatar
+                    sx={{ mt: 2, ml: 2, bgcolor: stringToColor(list.user.name) }}
+                  >{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
+                  <Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
+                </Box>
+                <Typography variant="h5" m={2}>
+                  {list.title}
+                </Typography>
+                <Box sx={{ mt: 2, mr: 2 }} alignItems="center" justifyContent="center">
+                  {list.category.name}
+                </Box>
+              </Icons>
+              {/* , border: "3px solid red" */}
+              <CardContent>
+                {list.items
+                  .sort((a, b) => a.rank - b.rank)
+                  .slice(0, list.shownItems!)
+                  .map((item) => (
+                    <Card sx={{ display: "flex", mb: 2 }} key={item.id}>
+                      <Box sx={{ display: "flex", flexDirection: "column", flex: 5 }}>
+                        <CardContent sx={{ flex: "1 0 auto" }}>
+                          <Stack direction="row" spacing={2}>
+                            <Typography component="div" variant="h3">
+                              {item.rank}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
-                              {item.details}
-                            </Typography>
+                            <Stack direction="column">
+                              <Typography component="div" variant="h5">
+                                {item.title}
+                              </Typography>
+                              <Typography variant="subtitle1" color="text.secondary" component="div">
+                                {item.details}
+                              </Typography>
+                            </Stack>
                           </Stack>
-                        </Stack>
-                        <Typography component="div">{item.userComment}</Typography>
-                      </CardContent>
-                    </Box>
-                    <CardMedia
-                      component="img"
-                      sx={{ width: 151, flex: 1 }}
-                      src={`${posterInitialUrl}${item.imageUrl}`}
-                      alt={item.title}
-                    />
-                  </Card>
-                ))}
-            </CardContent>
-            <CardActions>
-              <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
-                {list.likedByCurrentUser ? <ThumbUpAltIcon fontSize="large" /> : <ThumbUpOffAltIcon fontSize="large" />}
-              </IconButton>
-              <IconButton
-                aria-label="add"
-                size="small"
-                sx={{ color: "black" }}
-                onClick={handleShowMoreOnClick(listIndex)}
-              >
-                {list.items.length - 1 > list.shownItems! ? (
-                  <KeyboardArrowDownIcon fontSize="medium" />
-                ) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
-                  ""
-                ) : (
-                  <KeyboardArrowUpIcon fontSize="medium" />
-                )}
-              </IconButton>
-            </CardActions>
-          </Card>
-        ))}
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <IconButton aria-label="add" onClick={handleLoadMoreListsOnClick}>
-            <AddIcon fontSize="large" />
-          </IconButton>
-        </Box>
-      </Container>
-    </Box>
+                          <Typography component="div">{item.userComment}</Typography>
+                        </CardContent>
+                      </Box>
+                      <CardMedia
+                        component="img"
+                        sx={{ width: 151, flex: 1 }}
+                        src={`${posterInitialUrl}${item.imageUrl}`}
+                        alt={item.title}
+                      />
+                    </Card>
+                  ))}
+              </CardContent>
+              <CardActions>
+                <IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
+                  {list.likedByCurrentUser ? (
+                    <ThumbUpAltIcon fontSize="large" />
+                  ) : (
+                    <ThumbUpOffAltIcon fontSize="large" />
+                  )}
+                </IconButton>
+                <IconButton
+                  aria-label="add"
+                  size="small"
+                  sx={{ color: "black" }}
+                  onClick={handleShowMoreOnClick(listIndex)}
+                >
+                  {list.items.length - 1 > list.shownItems! ? (
+                    <KeyboardArrowDownIcon fontSize="medium" />
+                  ) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+                    ""
+                  ) : (
+                    <KeyboardArrowUpIcon fontSize="medium" />
+                  )}
+                </IconButton>
+              </CardActions>
+            </Card>
+          ))}
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <IconButton aria-label="add" onClick={handleLoadMoreListsOnClick}>
+              <AddIcon fontSize="large" />
+            </IconButton>
+          </Box>
+        </Container>
+      </Box>
+    </>
   );
 };
-
-export default Feed;

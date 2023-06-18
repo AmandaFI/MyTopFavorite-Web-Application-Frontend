@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import { stringToColor } from "../styleHelpers";
 import GroupsIcon from "@mui/icons-material/Groups";
 
-const Sidebar = () => {
+export const Sidebar = () => {
   const loggedUser = useContext(UserContext);
 
   return (
@@ -101,5 +101,3 @@ const Sidebar = () => {
     </Box>
   );
 };
-
-export default Sidebar;
