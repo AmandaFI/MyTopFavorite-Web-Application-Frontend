@@ -20,7 +20,7 @@ Currently the platform supports lists with themes related to movies, series and 
 
 ## **Front End Description** <a name="front-end-description"></a>
 
-The platform implementation is split into two repositories. This repository contains the React front end and [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend.git) contains the API implemented using Ruby on Rails.
+The platform implementation is split into two repositories. This repository contains the React front end and [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend.git) contains the API implemented using Ruby on Rails that this project is configured to consume.
 
 The user interface was implemented using the front end library React and the TypeScript programming language. The libraries Material UI and Material Icons were used for styling the interface components and the Vite tool was used to run and build the project.
 
@@ -81,9 +81,9 @@ $ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
 $ sudo apt-get install -y nodejs
 ```
 
-### **macOS and Windows systems**
+### **macOS or Windows systems**
 
-Download macOs installer and Windows installer respectively from the [official site](https://nodejs.org/en/download) and follow the installation steps presented.
+Download macOs installer or Windows installer respectively from the [official site](https://nodejs.org/en/download) and follow the installation steps presented.
 
 ## **Getting Started** <a name="getting-started"></a>
 
@@ -105,3 +105,5 @@ Run the Vite server:
 ```bash
 $ npm run dev
 ```
+
+By default, the Vite server runs on http://localhost:5173, however this can be changed if necessary.
