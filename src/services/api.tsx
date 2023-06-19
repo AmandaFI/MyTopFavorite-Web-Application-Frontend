@@ -69,8 +69,8 @@ export type putListType = Pick<Partial<completeListType>, "title" | "draft">;
 
 // ------------------- Axios Requests
 axios.defaults.withCredentials = true;
-// axios.defaults.baseURL = 'http://localhost:3000/api/'
-axios.defaults.baseURL = "http://mytopfavorite.com:3000/api/";
+axios.defaults.baseURL = "http://localhost:3000/api/";
+// axios.defaults.baseURL = "http://mytopfavorite.com:3000/api/";
 
 // ----- Session
 export const login = (info: authenticateUserType) => axios.post<userType>("/sessions", info);

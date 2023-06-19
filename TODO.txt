@@ -1,6 +1,9 @@
+verificar se ambiduos import nao acontece mais
+todos os components são exportados na declaracao da funçao e não mais com default export
+componentes sao importados com import { componente } from file com {}
+
 AGORA
 
--- em locais necessários, mostrar um toast quando deui erro no servidor (exemplo criar ou atualizar uma lista)
 -- paginar itens de uma lista
 -- arrumar banco de daos para so ter as 3 categorias e criar alguns usuarios e listas para mostrar
 
