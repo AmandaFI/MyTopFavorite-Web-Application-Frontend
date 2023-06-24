@@ -1,7 +1,7 @@
 import * as React from "react";
 import theme from "../theme";
-import { useState } from "react";
-import { authenticateUserType, userType, login } from "../services/api";
+import { useEffect, useState } from "react";
+import { authenticateUserType, userType, login, loginStatus } from "../services/api";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -17,125 +17,131 @@ import "react-toastify/dist/ReactToastify.css";
 import { baseToast } from "../styleHelpers";
 
 type signInFormProps = {
-  setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
-  setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+	setLoggedUser: React.Dispatch<React.SetStateAction<userType | null>>;
+	setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Copyright = (props: any) => {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {"Copyright © "}
-      MyTopFavorite {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
+	return (
+		<Typography variant="body2" color="text.secondary" align="center" {...props}>
+			{"Copyright © "}
+			MyTopFavorite {new Date().getFullYear()}
+			{"."}
+		</Typography>
+	);
 };
 
 export const SignInForm = (props: signInFormProps) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitButtonInactive, setSubmitButtonInactive] = useState(false);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [submitButtonInactive, setSubmitButtonInactive] = useState(false);
 
-  const authenticateUser = (credentials: authenticateUserType) => {
-    login(credentials)
-      .then((response) => {
-        props.setLoggedUser(response.data);
-      })
-      .catch((error) => {
-        if (error.response.status === 404)
-          toast.warn("E-mail e/ou senha incorretos.", {
-            ...baseToast,
-          });
-        else console.log(error);
-        setSubmitButtonInactive(false);
-      });
-  };
+	// Hack to activate Render server that stops running after 20 min without requests
+	// Remove when change the cloud provider
+	useEffect(() => {
+		loginStatus().then().catch();
+	}, []);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (email.trim() !== "" && password.trim() !== "") {
-      setSubmitButtonInactive(true);
-      authenticateUser({ email, password });
-    } else
-      toast.warn("Campos obrigatórios precisam ser preenchidos.", {
-        ...baseToast,
-      });
-  };
+	const authenticateUser = (credentials: authenticateUserType) => {
+		login(credentials)
+			.then((response) => {
+				props.setLoggedUser(response.data);
+			})
+			.catch((error) => {
+				if (error.response.status === 404)
+					toast.warn("E-mail e/ou senha incorretos.", {
+						...baseToast,
+					});
+				else console.log(error);
+				setSubmitButtonInactive(false);
+			});
+	};
 
-  return (
-    <>
-      <ToastContainer />
-      <ThemeProvider theme={theme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Avatar sx={{ m: 1, bgcolor: theme.palette.secondary.main }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Entrar
-            </Typography>
-            <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="E-mail"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Senha"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, bgcolor: theme.palette.primary.main }}
-                disabled={submitButtonInactive}
-              >
-                Entrar
-              </Button>
-              <Grid container>
-                {/* <Grid item xs>
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		if (email.trim() !== "" && password.trim() !== "") {
+			setSubmitButtonInactive(true);
+			authenticateUser({ email, password });
+		} else
+			toast.warn("Campos obrigatórios precisam ser preenchidos.", {
+				...baseToast,
+			});
+	};
+
+	return (
+		<>
+			<ToastContainer />
+			<ThemeProvider theme={theme}>
+				<Container component="main" maxWidth="xs">
+					<CssBaseline />
+					<Box
+						sx={{
+							marginTop: 8,
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+						}}
+					>
+						<Avatar sx={{ m: 1, bgcolor: theme.palette.secondary.main }}>
+							<LockOutlinedIcon />
+						</Avatar>
+						<Typography component="h1" variant="h5">
+							Entrar
+						</Typography>
+						<Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
+							<TextField
+								margin="normal"
+								required
+								fullWidth
+								id="email"
+								label="E-mail"
+								name="email"
+								autoComplete="email"
+								autoFocus
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+							/>
+							<TextField
+								margin="normal"
+								required
+								fullWidth
+								name="password"
+								label="Senha"
+								type="password"
+								id="password"
+								autoComplete="current-password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+							/>
+							<Button
+								type="submit"
+								fullWidth
+								variant="contained"
+								sx={{ mt: 3, mb: 2, bgcolor: theme.palette.primary.main }}
+								disabled={submitButtonInactive}
+							>
+								Entrar
+							</Button>
+							<Grid container>
+								{/* <Grid item xs>
                 <Link to="/signup" style={{ textDecoration: "none", color: theme.palette.primary.main }}>
                   Esqueci minha senha
                 </Link>
               </Grid> */}
-                <Grid
-                  item
-                  onClick={(_e) => {
-                    props.setSignUp(true);
-                  }}
-                >
-                  {"Não possui uma conta? Cadastrar"}
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-          <Copyright sx={{ mt: 8, mb: 4 }} />
-        </Container>
-      </ThemeProvider>
-    </>
-  );
+								<Grid
+									item
+									onClick={(_e) => {
+										props.setSignUp(true);
+									}}
+								>
+									{"Não possui uma conta? Cadastrar"}
+								</Grid>
+							</Grid>
+						</Box>
+					</Box>
+					<Copyright sx={{ mt: 8, mb: 4 }} />
+				</Container>
+			</ThemeProvider>
+		</>
+	);
 };
