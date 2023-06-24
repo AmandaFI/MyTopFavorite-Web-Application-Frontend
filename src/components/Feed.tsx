@@ -12,8 +12,6 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import { ToastContainer, toast } from "react-toastify";
@@ -183,11 +181,21 @@ export const Feed = () => {
 											)}
 										</IconButton>
 										{list.items.length - 1 > list.shownItems! ? (
-											<Button sx={{ color: "black", backgroundColor: "white" }}>+</Button>
+											<Button
+												sx={{ color: "black", backgroundColor: "white" }}
+												onClick={handleShowMoreOnClick(listIndex)}
+											>
+												+
+											</Button>
 										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
 											""
 										) : (
-											<Button sx={{ color: "black", backgroundColor: "white" }}>-</Button>
+											<Button
+												sx={{ color: "black", backgroundColor: "white" }}
+												onClick={handleShowMoreOnClick(listIndex)}
+											>
+												-
+											</Button>
 										)}
 										{/* <IconButton size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 											{list.items.length - 1 > list.shownItems! ? (
