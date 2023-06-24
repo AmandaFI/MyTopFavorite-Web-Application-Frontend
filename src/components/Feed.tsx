@@ -174,22 +174,24 @@ export const Feed = () => {
 										))}
 								</CardContent>
 								<CardActions>
-									<IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
-										{list.likedByCurrentUser ? (
-											<ThumbUpAltIcon fontSize="large" />
-										) : (
-											<ThumbUpOffAltIcon fontSize="large" />
-										)}
-									</IconButton>
-									<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
-										{list.items.length - 1 > list.shownItems! ? (
-											<ArrowDropDownIcon fontSize="large" />
-										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
-											""
-										) : (
-											<ArrowDropUpIcon fontSize="large" />
-										)}
-									</IconButton>
+									<Stack direction="column" spacing={2}>
+										<IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
+											{list.likedByCurrentUser ? (
+												<ThumbUpAltIcon fontSize="large" />
+											) : (
+												<ThumbUpOffAltIcon fontSize="large" />
+											)}
+										</IconButton>
+										<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
+											{list.items.length - 1 > list.shownItems! ? (
+												<ArrowDropDownIcon fontSize="large" />
+											) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+												""
+											) : (
+												<ArrowDropUpIcon fontSize="large" />
+											)}
+										</IconButton>
+									</Stack>
 								</CardActions>
 							</Card>
 						))}
