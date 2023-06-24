@@ -4,7 +4,7 @@ import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislik
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons, baseToast, stringToColor } from "../styleHelpers";
-import { Box, CircularProgress, Container, IconButton, Stack } from "@mui/material";
+import { Box, Button, CircularProgress, Container, IconButton, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -182,7 +182,14 @@ export const Feed = () => {
 												<ThumbUpOffAltIcon fontSize="large" />
 											)}
 										</IconButton>
-										<IconButton size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
+										{list.items.length - 1 > list.shownItems! ? (
+											<Button sx={{ color: "black", backgroundColor: "white" }}>+</Button>
+										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+											""
+										) : (
+											<Button sx={{ color: "black", backgroundColor: "white" }}>-</Button>
+										)}
+										{/* <IconButton size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 											{list.items.length - 1 > list.shownItems! ? (
 												<ArrowDropDownIcon fontSize="large" />
 											) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
@@ -190,7 +197,7 @@ export const Feed = () => {
 											) : (
 												<ArrowDropUpIcon fontSize="large" />
 											)}
-										</IconButton>
+										</IconButton> */}
 									</Stack>
 								</CardActions>
 							</Card>

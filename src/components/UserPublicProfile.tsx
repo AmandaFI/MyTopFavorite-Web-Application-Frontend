@@ -144,9 +144,7 @@ export const UserPublicProfile = () => {
 									<Typography component="div" variant="h5" sx={{ color: "white", mt: 5 }}>
 										{searchedUser ? searchedUser.name : ""}
 									</Typography>
-									<Box sx={{ color: "white" }}>
-										{searchedUser ? `${searchedUser.followedUsersCount} Seguidores` : ""}
-									</Box>
+									<Box sx={{ color: "white" }}>{searchedUser ? `${searchedUser.followersCount} Seguidores` : ""}</Box>
 									<Button
 										size="small"
 										sx={{ color: "white", backgroundColor: theme.palette.primary.main, maxWidth: 150 }}
