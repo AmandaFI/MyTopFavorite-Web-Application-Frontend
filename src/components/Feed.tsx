@@ -13,6 +13,8 @@ import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
 import AddIcon from "@mui/icons-material/Add";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -180,7 +182,7 @@ export const Feed = () => {
 												<ThumbUpOffAltIcon fontSize="large" />
 											)}
 										</IconButton>
-										{list.items.length - 1 > list.shownItems! ? (
+										{/* {list.items.length - 1 > list.shownItems! ? (
 											<Button
 												sx={{ color: "black", backgroundColor: "white" }}
 												onClick={handleShowMoreOnClick(listIndex)}
@@ -188,7 +190,7 @@ export const Feed = () => {
 												+
 											</Button>
 										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
-											""
+											"aa"
 										) : (
 											<Button
 												sx={{ color: "black", backgroundColor: "white" }}
@@ -196,16 +198,16 @@ export const Feed = () => {
 											>
 												-
 											</Button>
-										)}
-										{/* <IconButton size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
+										)} */}
+										<IconButton size="medium" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 											{list.items.length - 1 > list.shownItems! ? (
-												<ArrowDropDownIcon fontSize="large" />
+												<ExpandMoreIcon fontSize="large" />
 											) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
-												""
+												"aaa"
 											) : (
-												<ArrowDropUpIcon fontSize="large" />
+												<ExpandLessIcon fontSize="large" />
 											)}
-										</IconButton> */}
+										</IconButton>
 									</Stack>
 								</CardActions>
 							</Card>
