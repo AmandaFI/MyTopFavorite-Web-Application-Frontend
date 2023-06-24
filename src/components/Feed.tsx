@@ -181,12 +181,7 @@ export const Feed = () => {
 											<ThumbUpOffAltIcon fontSize="large" />
 										)}
 									</IconButton>
-									<IconButton
-										aria-label="add"
-										size="small"
-										sx={{ color: "black" }}
-										onClick={handleShowMoreOnClick(listIndex)}
-									>
+									<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 										{list.items.length - 1 > list.shownItems! ? (
 											<KeyboardArrowDownIcon fontSize="medium" />
 										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
