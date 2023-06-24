@@ -174,7 +174,7 @@ export const Feed = () => {
 										))}
 								</CardContent>
 								<CardActions>
-									<Stack direction="column" spacing={2}>
+									<Stack direction="row" spacing={1}>
 										<IconButton size="small" sx={{ color: "black" }} onClick={handleLikeListOnClick(list)}>
 											{list.likedByCurrentUser ? (
 												<ThumbUpAltIcon fontSize="large" />
@@ -182,7 +182,7 @@ export const Feed = () => {
 												<ThumbUpOffAltIcon fontSize="large" />
 											)}
 										</IconButton>
-										<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
+										<IconButton size="small" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 											{list.items.length - 1 > list.shownItems! ? (
 												<ArrowDropDownIcon fontSize="large" />
 											) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
