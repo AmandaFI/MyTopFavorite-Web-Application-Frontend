@@ -200,10 +200,10 @@ export const Feed = () => {
 											</Button>
 										)} */}
 										<IconButton size="medium" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
-											{list.items.length - 1 > list.shownItems! ? (
+											{list.items.length > list.shownItems! ? (
 												<ExpandMoreIcon fontSize="large" />
-											) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
-												"aaa"
+											) : list.items.length <= SHOWN_ITEMS_PER_LIST ? (
+												""
 											) : (
 												<ExpandLessIcon fontSize="large" />
 											)}
