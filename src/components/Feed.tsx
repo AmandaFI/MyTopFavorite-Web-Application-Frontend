@@ -170,9 +170,9 @@ export const Feed = () => {
 									)}
 								</IconButton>
 								<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
-									{list.items.length - 1 > list.shownItems! ? (
+									{list.items.length > list.shownItems! ? (
 										<KeyboardArrowDownIcon fontSize="medium" />
-									) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
+									) : list.items.length <= SHOWN_ITEMS_PER_LIST ? (
 										""
 									) : (
 										<KeyboardArrowUpIcon fontSize="medium" />
