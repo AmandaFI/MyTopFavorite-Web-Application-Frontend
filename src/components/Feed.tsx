@@ -4,7 +4,7 @@ import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislik
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons, baseToast, stringToColor } from "../styleHelpers";
-import { Box, Button, CircularProgress, Container, IconButton, Stack } from "@mui/material";
+import { Box, CircularProgress, Container, IconButton, Stack } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
