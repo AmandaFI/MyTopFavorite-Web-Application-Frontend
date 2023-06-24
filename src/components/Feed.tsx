@@ -12,8 +12,8 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import CardMedia from "@mui/material/CardMedia";
 import AddIcon from "@mui/icons-material/Add";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import { ToastContainer, toast } from "react-toastify";
@@ -181,18 +181,13 @@ export const Feed = () => {
 											<ThumbUpOffAltIcon fontSize="large" />
 										)}
 									</IconButton>
-									<IconButton
-										size="small"
-										aria-label="add"
-										sx={{ color: "black" }}
-										onClick={handleShowMoreOnClick(listIndex)}
-									>
+									<IconButton aria-label="add" sx={{ color: "black" }} onClick={handleShowMoreOnClick(listIndex)}>
 										{list.items.length - 1 > list.shownItems! ? (
-											<KeyboardArrowDownIcon fontSize="medium" />
+											<ArrowDropDownIcon fontSize="large" />
 										) : list.items.length - 1 <= SHOWN_ITEMS_PER_LIST ? (
 											""
 										) : (
-											<KeyboardArrowUpIcon fontSize="large" />
+											<ArrowDropUpIcon fontSize="large" />
 										)}
 									</IconButton>
 								</CardActions>
