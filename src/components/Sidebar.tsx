@@ -19,7 +19,7 @@ import { stringToColor } from "../styleHelpers";
 import GroupsIcon from "@mui/icons-material/Groups";
 
 export const Sidebar = () => {
-	const loggedUser = useContext(UserContext);
+	const { loggedUser } = useContext(UserContext);
 
 	return (
 		<Box

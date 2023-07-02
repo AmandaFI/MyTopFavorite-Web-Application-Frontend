@@ -1,7 +1,7 @@
 import * as React from "react";
 import theme from "../theme";
 import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislikeList } from "../services/api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons, baseToast, stringToColor } from "../styleHelpers";
 import { Box, Container, IconButton, Stack } from "@mui/material";
@@ -18,12 +18,15 @@ import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UserContext } from "../App";
 
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
 export const Feed = () => {
 	const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
 	const [databasePage, setDatabasePage] = useState(1);
+
+	const { token } = useContext(UserContext);
 
 	const shuffle = (array: Array<any>) => array.sort((_a, _b) => 0.5 - Math.random());
 
@@ -36,7 +39,7 @@ export const Feed = () => {
 	};
 
 	useEffect(() => {
-		initialLoadFeed()
+		initialLoadFeed(token)
 			.then((response) => {
 				setFeedContent(preProcessListsForFeed(response.data));
 				setDatabasePage((previousValue) => previousValue + 1);
@@ -65,7 +68,7 @@ export const Feed = () => {
 	};
 
 	const handleLoadMoreListsOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		paginationLoadFeed(databasePage)
+		paginationLoadFeed(databasePage, token)
 			.then((response) => {
 				setFeedContent((previousLists) => [...previousLists, ...preProcessListsForFeed(response.data)]);
 				setDatabasePage((previousValue) => previousValue + 1);
@@ -80,7 +83,7 @@ export const Feed = () => {
 	const handleLikeListOnClick =
 		(currentList: completeListType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 			if (currentList.likedByCurrentUser! === false) {
-				likeList(currentList.id)
+				likeList(currentList.id, token)
 					.then((_response) => {
 						setFeedContent((previousLists) =>
 							previousLists.map((list) =>
@@ -92,7 +95,7 @@ export const Feed = () => {
 					})
 					.catch((error) => console.log(error));
 			} else {
-				dislikeList(currentList.id)
+				dislikeList(currentList.id, token)
 					.then((_response) =>
 						setFeedContent((previousLists) =>
 							previousLists.map((list) =>

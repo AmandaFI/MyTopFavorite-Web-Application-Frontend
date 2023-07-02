@@ -40,6 +40,7 @@ export const SignInForm = (props: signInFormProps) => {
 		login(credentials)
 			.then((response) => {
 				props.setLoggedUser(response.data);
+				localStorage.setItem("token", response.headers["authorization"].split(" ")[1]);
 			})
 			.catch((error) => {
 				if (error.response.status === 404)

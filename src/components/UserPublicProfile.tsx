@@ -1,6 +1,6 @@
 import theme from "../theme";
 import { Icons, baseToast, stringToColor } from "../styleHelpers";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { useNavigate, useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,6 +32,7 @@ import {
 	likeList,
 	dislikeList,
 } from "../services/api";
+import { UserContext } from "../App";
 
 export const UserPublicProfile = () => {
 	const { id } = useParams();
@@ -41,14 +42,16 @@ export const UserPublicProfile = () => {
 	const [following, setFollowing] = useState(false);
 	const [paginationPage, setPaginationPage] = useState(1);
 
+	const { token } = useContext(UserContext);
+
 	useEffect(() => {
 		if (id === undefined) navigate("/feed");
 		else {
 			setPaginationPage(1);
-			searchUserById(+id)
+			searchUserById(+id, token)
 				.then((response) => {
 					setSearchedUser(response.data);
-					userPublishedListsPaginated(+id!, 1).then((response) => {
+					userPublishedListsPaginated(+id!, 1, token).then((response) => {
 						setSearchedUserLists(response.data as completeListType[]);
 						setPaginationPage((previousPage) => previousPage + 1);
 					});
@@ -59,7 +62,7 @@ export const UserPublicProfile = () => {
 					})
 				);
 
-			checkFollowingUser(+id)
+			checkFollowingUser(+id, token)
 				.then((_response) => {
 					setFollowing(true);
 				})
@@ -69,11 +72,11 @@ export const UserPublicProfile = () => {
 
 	const handleFollowUserOnCLick = () => {
 		if (following) {
-			unfollowUser(+id!)
+			unfollowUser(+id!, token)
 				.then((_response) => setFollowing(false))
 				.catch((error) => console.log(error));
 		} else {
-			followUser(+id!)
+			followUser(+id!, token)
 				.then((_response) => setFollowing(true))
 				.catch((error) => console.log(error));
 		}
@@ -82,7 +85,7 @@ export const UserPublicProfile = () => {
 	const handleLoadMoreListsOnClick = () => {
 		if (id === undefined) navigate("/feed");
 		else {
-			userPublishedListsPaginated(+id, paginationPage)
+			userPublishedListsPaginated(+id, paginationPage, token)
 				.then((response) => {
 					setSearchedUserLists((previousLists) => [...previousLists, ...(response.data as completeListType[])]);
 					setPaginationPage((previousPage) => previousPage + 1);
@@ -98,7 +101,7 @@ export const UserPublicProfile = () => {
 	const handleLikeListOnClick =
 		(currentList: completeListType) => (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 			if (currentList.likedByCurrentUser! === false) {
-				likeList(currentList.id)
+				likeList(currentList.id, token)
 					.then((_response) => {
 						setSearchedUserLists((previousLists) =>
 							previousLists.map((list) =>
@@ -110,7 +113,7 @@ export const UserPublicProfile = () => {
 					})
 					.catch((error) => console.log(error));
 			} else {
-				dislikeList(currentList.id)
+				dislikeList(currentList.id, token)
 					.then((_response) =>
 						setSearchedUserLists((previousLists) =>
 							previousLists.map((list) =>

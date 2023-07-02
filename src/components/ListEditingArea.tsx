@@ -1,15 +1,13 @@
-import React, { useEffect, useState, useRef, SyntheticEvent } from "react";
+import React, { useEffect, useState, useRef, SyntheticEvent, useContext } from "react";
 import { Box, Checkbox, CircularProgress, FormControlLabel, Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import {
 	posterInitialUrl,
+	searchItemByTitle,
+	CategoryUrlSegmentType,
 	tmdbMovieType,
-	searchMovieByTitle,
-	searchPersonByName,
-	searchSeriesByTitle,
 	tmdbSeriesType,
 	tmdbPersonType,
-	tmdbResponseType,
 } from "../services/tmdbApi";
 import Container from "@mui/material/Container";
 import theme from "../theme";
@@ -55,9 +53,9 @@ import {
 	GridRowParams,
 	MuiEvent,
 } from "@mui/x-data-grid";
-import { AxiosResponse } from "axios";
+import { UserContext } from "../App";
 
-type genericTmdbResults = {
+type genericTmdbResultType = {
 	externalApiIdentifier: string;
 	title: string;
 	imageUrl: string;
@@ -67,15 +65,17 @@ type genericTmdbResults = {
 export const ListEditingArea = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
+	const { token } = useContext(UserContext);
 
 	const [list, setList] = useState<completeListType | null>(null);
-	const [chosenItem, setChosenItem] = useState<genericTmdbResults | boolean>(false);
-	const [tmdbApiResults, setTmdbApiResults] = useState<genericTmdbResults[]>([]);
+	const [chosenItem, setChosenItem] = useState<genericTmdbResultType | boolean>(false);
+	const [tmdbApiResults, setTmdbApiResults] = useState<genericTmdbResultType[]>([]);
 	const [titleBeingEdited, setTitleBeingEdited] = useState("");
 	const [itemBeingEdited, setItemBeingEdited] = useState<simplifiedListItemType | null>(null);
 	const [publishCheckBox, setPublishCheckBox] = useState(false);
 	const [rankCount, setRankCount] = useState(0);
 	const [openSearchItemModal, setOpenSearchItemModal] = useState(false);
+	const [category, setCategory] = useState<CategoryUrlSegmentType>("movie");
 
 	const chosenItemUsertext = useRef<HTMLInputElement | null>(null);
 	const searchTitle = useRef<HTMLInputElement | null>(null);
@@ -109,12 +109,13 @@ export const ListEditingArea = () => {
 	useEffect(() => {
 		if (id === undefined) navigate("/manage-lists");
 		else {
-			getSingleList(+id)
+			getSingleList(+id, token)
 				.then((response) => {
 					setList(response.data);
 					setTitleBeingEdited(response.data.title);
 					setPublishCheckBox(!response.data.draft);
 					setRankCount(response.data.items.length);
+					setCategory(response.data.category.name as CategoryUrlSegmentType);
 				})
 				.catch((_error) =>
 					toast.error("Lista não encontrada.", {
@@ -128,10 +129,7 @@ export const ListEditingArea = () => {
 	const callTmdbSearchApi = () => {
 		const title = searchTitle!.current!.value.trim();
 		if (title !== "") {
-			const category = list ? list.category.name : "";
-			if (category === "Filmes") searchItem(searchMovieByTitle, title);
-			else if (category === "Séries") searchItem(searchSeriesByTitle, title);
-			else if (category === "Pessoas") searchItem(searchPersonByName, title);
+			searchItem(title);
 		}
 	};
 
@@ -140,153 +138,44 @@ export const ListEditingArea = () => {
 			callTmdbSearchApi();
 		}
 	};
-	// ------------------------------------------- Alternative implementations ----------------------------------
-	// ------------------------------------------- Formatters for each type of tmdb response --------------------
-	// const movieTypeToGenericType = (movies: Array<tmdbMovieType>) => {
-	//   return movies.map((movie) => {
-	//     return {
-	//       externalApiIdentifier: String(movie.id),
-	//       title: movie.original_title,
-	//       imageUrl: movie.poster_path,
-	//       details: movie.release_date,
-	//     };
-	//   });
-	// };
 
-	// const seriesTypeToGenericType = (series: Array<tmdbSeriesType>) => {
-	//   return series.map((item) => {
-	//     return {
-	//       externalApiIdentifier: String(item.id),
-	//       title: item.original_name,
-	//       imageUrl: item.poster_path,
-	//       details: item.first_air_date,
-	//     };
-	//   });
-	// };
+	const mapTmdbResultsByCategory = (
+		category: CategoryUrlSegmentType,
+		results: (tmdbMovieType | tmdbSeriesType | tmdbPersonType)[]
+	): genericTmdbResultType[] => {
+		results.forEach((result) => (result.category = category));
 
-	// const personTypeToGenericType = (people: Array<tmdbPersonType>) => {
-	//   return people.map((person) => {
-	//     return {
-	//       externalApiIdentifier: String(person.id),
-	//       title: person.original_name,
-	//       imageUrl: person.profile_path,
-	//       details: "",
-	//     };
-	//   });
-	// };
-	// --------------------------------------------------------------------------------------------------------
-
-	// ------------------------------------------- Implementation 1 -------------------------------------------
-	// Muita repetição de código, tem-se duas funções para cada tipo de resposta da api do Tmdb. Total 7 funçẽos.
-
-	// const handleSearchItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-	//   const title = searchTitle!.current!.value.trim();
-	//   if (title !== "") {
-	//     const category = list ? list.category.name : "";
-	//     if (category === "Filmes") searchMovie(title);
-	//     else if (category === "Séries") searchSeries(title);
-	//     else if (category === "Pessoas") searchPerson(title);
-	//   }
-	// };
-
-	// const searchMovie = (title: string) => {
-	//   searchMovieByTitle(title)
-	//     .then((response) => {
-	//       if (response.data.results.length === 0)
-	//         setTmdbApiResults([
-	//           { externalApiIdentifier: "0", title: "Nenhum filme encontrado", imageUrl: "", details: "" },
-	//         ]);
-	//       else setTmdbApiResults(movieTypeToGenericType(response.data.results as Array<tmdbMovieType>));
-	//     })
-	//     .catch((error) => console.log(error));
-	// };
-
-	// const searchSeries = (title: string) => {
-	//   searchSeriesByTitle(title)
-	//     .then((response) => {
-	//       if (response.data.results.length === 0)
-	//         setTmdbApiResults([
-	//           { externalApiIdentifier: "0", title: "Nenhuma série encontrada", imageUrl: "", details: "" },
-	//         ]);
-	//       else setTmdbApiResults(seriesTypeToGenericType(response.data.results as Array<tmdbSeriesType>));
-	//     })
-	//     .catch((error) => console.log(error));
-	// };
-
-	// const searchPerson = (name: string) => {
-	//   searchPersonByName(name)
-	//     .then((response) => {
-	//       if (response.data.results.length === 0)
-	//         setTmdbApiResults([
-	//           { externalApiIdentifier: "0", title: "Nenhuma pessoa encontrada", imageUrl: "", details: "" },
-	//         ]);
-	//       else setTmdbApiResults(personTypeToGenericType(response.data.results as Array<tmdbPersonType>));
-	//     })
-	//     .catch((error) => console.log(error));
-	// };
-
-	// --------------------------------------------------------------------------------------------------------
-
-	// ------------------------------------------- Implementation 2 -------------------------------------------
-	// Pode-se passar qualquer tipo para o Type e não tem como verifica-lo ou restringi-lo para um set especifico
-	// tipos permitidos. Tem como exigir que os tipos passados para type tenham certas properties, porém, são poucas
-	// e genéricas (ex: id) as properties comuns aos tipos que seriam permitidos.
-	// Tem-se um formatter para cada tipo permitido na função.
-	// Total 5 funções.
-
-	// const handleSearchItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-	//   const title = searchTitle!.current!.value.trim();
-	//   if (title !== "") {
-	//     const category = list ? list.category.name : "";
-	//     if (category === "Filmes") searchItem<tmdbMovieType>(searchMovieByTitle, movieTypeToGenericType, title);
-	//     else if (category === "Séries") searchItem<tmdbSeriesType>(searchSeriesByTitle, seriesTypeToGenericType, title);
-	//     else if (category === "Pessoas") searchItem<tmdbPersonType>(searchPersonByName, personTypeToGenericType, title);
-	//   }
-	// };
-
-	// const searchItem = <Type,>(
-	//   searchFn: (title: string) => Promise<AxiosResponse<tmdbResponseType, any>>,
-	//   responseFormatterFn: (response: Array<Type>) => Array<genericTmdbResults>,
-	//   title: string
-	// ) => {
-	//   searchFn(title)
-	//     .then((response) => {
-	//       if (response.data.results.length === 0)
-	//         setTmdbApiResults([
-	//           { externalApiIdentifier: "0", title: "Nenhum item encontrado", imageUrl: "", details: "" },
-	//         ]);
-	//       else setTmdbApiResults(responseFormatterFn(response.data.results as Array<Type>));
-	//     })
-	//     .catch((error) => console.log(error));
-	// };
-
-	// --------------------------------------------------------------------------------------------------------
-
-	// ------------------------------------------- Implementation 3 -------------------------------------------
-	// formatToGenericType está muito precária ?
-	// Total 3 funções.
-
-	const formatToGenericType = (items: Array<tmdbResultType>) => {
-		return items.map((item) => {
-			return {
-				externalApiIdentifier: String(item.id),
-				title: "original_name" in item ? item.original_name : item.original_title,
-				imageUrl: "poster_path" in item ? item.poster_path : item.profile_path,
-				details: "release_date" in item ? item.release_date : "first_air_date" in item ? item.first_air_date : "",
-			};
+		return results.map((result) => {
+			switch (result.category) {
+				case "movie":
+					return {
+						externalApiIdentifier: String(result.id),
+						title: result.original_title,
+						imageUrl: result.poster_path,
+						details: result.release_date,
+					};
+				case "person":
+					return {
+						externalApiIdentifier: String(result.id),
+						title: result.original_name,
+						imageUrl: result.profile_path,
+						details: result.known_for_department,
+					};
+				case "tv":
+					return {
+						externalApiIdentifier: String(result.id),
+						title: result.original_name,
+						imageUrl: result.poster_path,
+						details: result.first_air_date,
+					};
+			}
 		});
 	};
 
-	type tmdbResultType = tmdbMovieType | tmdbSeriesType | tmdbPersonType;
-
-	const searchItem = (searchFn: (title: string) => Promise<AxiosResponse<tmdbResponseType, any>>, title: string) => {
-		searchFn(title)
+	const searchItem = (title: string) => {
+		searchItemByTitle(title, category)
 			.then((response) => {
-				if (response.data.results.length === 0)
-					setTmdbApiResults([
-						{ externalApiIdentifier: "0", title: "Nenhum item encontrado", imageUrl: "", details: "" },
-					]);
-				else setTmdbApiResults(formatToGenericType(response.data.results as Array<tmdbResultType>));
+				setTmdbApiResults(mapTmdbResultsByCategory(category, response.data.results));
 			})
 			.catch((_error) =>
 				toast.error("Erro ao buscar item.", {
@@ -295,14 +184,7 @@ export const ListEditingArea = () => {
 			);
 	};
 
-	// --------------------------------------------------------------------------------------------------------
-
-	// ------------------------------------------- Possible Implementation 4 ----------------------------------
-	// Transformar o type tmdbResultType da implementação 3 em classes e no formatter usar o is para verificar
-	// a qual classe pertence o objeto passado e evitar ficar verificando existencia de properties
-	// --------------------------------------------------------------------------------------------------------
-
-	const apiInputListItemTypeFormatter = (item: genericTmdbResults, comment: string) => {
+	const apiInputListItemTypeFormatter = (item: genericTmdbResultType, comment: string) => {
 		if (itemBeingEdited === null) {
 			setRankCount((previousValue) => previousValue + 1);
 		}
@@ -327,11 +209,11 @@ export const ListEditingArea = () => {
 
 	const handleAddItemOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const newItem: postListItemType = apiInputListItemTypeFormatter(
-			chosenItem as genericTmdbResults,
+			chosenItem as genericTmdbResultType,
 			chosenItemUsertext!.current!.value
 		);
 		if (itemBeingEdited === null) {
-			insertItem(Number(list?.id), newItem)
+			insertItem(Number(list?.id), newItem, token)
 				.then((response) => {
 					const addedItem = listItemTypeFormatter(response.data);
 					setList((previousList) => {
@@ -345,7 +227,7 @@ export const ListEditingArea = () => {
 					})
 				);
 		} else {
-			updateItem(newItem, itemBeingEdited.id)
+			updateItem(newItem, itemBeingEdited.id, token)
 				.then((response) => {
 					const replacedItem = listItemTypeFormatter(response.data);
 					setList((previousList) => {
@@ -377,17 +259,17 @@ export const ListEditingArea = () => {
 				toast.warn("Uma lista publicada não pode ter menos que 3 itens. A lista será mantida privada.", {
 					...baseToast,
 				});
-				updateList(list!.id, { draft: true })
+				updateList(list!.id, { draft: true }, token)
 					.then(() => setPublishCheckBox(false))
 					.catch((error) => console.log(error));
 			}
 			let success = true;
-			deleteItem(removeItemId)
+			deleteItem(removeItemId, token)
 				.then((_response) => {
 					setRankCount((previousCount) => previousCount - 1);
 					list!.items.forEach((item, index) => {
 						if (index > removeItemIndex - 1) {
-							updateItem({ rank: item.rank - 1 }, item.id)
+							updateItem({ rank: item.rank - 1 }, item.id, token)
 								.then(() => {})
 								.catch(() => (success = false));
 						}
@@ -419,7 +301,7 @@ export const ListEditingArea = () => {
 	};
 
 	const handleSaveItemEditedOnClick = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		updateItem(itemBeingEdited!, itemBeingEdited!.id)
+		updateItem(itemBeingEdited!, itemBeingEdited!.id, token)
 			.then((response) => {
 				const editedItem = listItemTypeFormatter(response.data);
 				setList((previousList) => {
@@ -441,7 +323,7 @@ export const ListEditingArea = () => {
 				...baseToast,
 			});
 		} else if (checked) {
-			updateList(list!.id, { draft: false })
+			updateList(list!.id, { draft: false }, token)
 				.then((_response) => {
 					setList((previousList) => {
 						return { ...previousList!, draft: true };
@@ -457,7 +339,7 @@ export const ListEditingArea = () => {
 	};
 
 	const handleTitleOnBlur = (_e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => {
-		updateList(list!.id, { title: titleBeingEdited })
+		updateList(list!.id, { title: titleBeingEdited }, token)
 			.then(() => {})
 			.catch((error) => console.log(error));
 	};
@@ -466,9 +348,9 @@ export const ListEditingArea = () => {
 		const sourceIndex = result.source.index;
 		const destinationIndex = result.destination.index;
 
-		updateItem({ rank: destinationIndex + 1 }, list!.items[sourceIndex].id)
+		updateItem({ rank: destinationIndex + 1 }, list!.items[sourceIndex].id, token)
 			.then(() => {
-				updateItem({ rank: sourceIndex + 1 }, list!.items[destinationIndex].id)
+				updateItem({ rank: sourceIndex + 1 }, list!.items[destinationIndex].id, token)
 					.then(() => {
 						setList((previousList) => {
 							return {

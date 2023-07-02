@@ -12,37 +12,48 @@ import { UserPrivateArea } from "./components/UserPrivateArea";
 import { UserPublicProfile } from "./components/UserPublicProfile";
 import { Box, Stack } from "@mui/material";
 
-export const UserContext = createContext<userType | null>(null);
-export const NewListContext = createContext<simplifiedListType | null>(null);
+type loggedUserType = userType | null;
+type tokenType = string | null;
+
+type userContextType = {
+	loggedUser: loggedUserType;
+	token: tokenType;
+};
+
+export const UserContext = createContext<userContextType>({ loggedUser: null, token: null });
 
 export const App = () => {
-  const [loggedUser, setLoggedUser] = useState<userType | null>(null);
-  const [signUp, setSignUp] = useState(false);
+	const [loggedUser, setLoggedUser] = useState<loggedUserType>(null);
+	const [signUp, setSignUp] = useState(false);
+	const [token, setToken] = useState<tokenType>(null);
 
-  React.useEffect(() => {
-    loginStatus().then((response) => setLoggedUser(response.data));
-  }, []);
+	React.useEffect(() => {
+		setToken(localStorage.getItem("token"));
+		loginStatus(token)
+			.then((response) => setLoggedUser(response.data))
+			.catch(() => {});
+	}, []);
 
-  if (signUp) return <SignUpForm {...{ setSignUp }} />;
-  else if (loggedUser === null) return <SignInForm {...{ setLoggedUser, setSignUp }} />;
+	if (signUp) return <SignUpForm {...{ setSignUp }} />;
+	else if (loggedUser === null) return <SignInForm {...{ setLoggedUser, setSignUp }} />;
 
-  return (
-    <>
-      <UserContext.Provider value={loggedUser}>
-        <Box>
-          <Navbar {...{ setLoggedUser }} />
-          <Stack direction="row" justifyContent={"space-between"}>
-            <Sidebar />
-            <Routes>
-              <Route path="/" element={<Feed />} />
-              <Route path="/feed" element={<Feed />} />
-              <Route path="/manage-lists" element={<UserPrivateArea />} />
-              <Route path="/edit-list/:id" element={<ListEditingArea />} />
-              <Route path="/user-profile/:id" element={<UserPublicProfile />} />
-            </Routes>
-          </Stack>
-        </Box>
-      </UserContext.Provider>
-    </>
-  );
+	return (
+		<>
+			<UserContext.Provider value={{ loggedUser, token }}>
+				<Box>
+					<Navbar {...{ setLoggedUser }} />
+					<Stack direction="row" justifyContent={"space-between"}>
+						<Sidebar />
+						<Routes>
+							<Route path="/" element={<Feed />} />
+							<Route path="/feed" element={<Feed />} />
+							<Route path="/manage-lists" element={<UserPrivateArea />} />
+							<Route path="/edit-list/:id" element={<ListEditingArea />} />
+							<Route path="/user-profile/:id" element={<UserPublicProfile />} />
+						</Routes>
+					</Stack>
+				</Box>
+			</UserContext.Provider>
+		</>
+	);
 };

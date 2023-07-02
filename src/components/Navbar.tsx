@@ -33,19 +33,18 @@ export const Navbar = (props: navbarPropsType) => {
 	const [usersFound, setUsersFound] = useState<Array<userType>>([]);
 	const [searchedUser, setSearchedUser] = useState("");
 	const navigate = useNavigate();
-	const loggedUser = useContext(UserContext);
+	const { loggedUser, token } = useContext(UserContext);
 
 	const handleLogoutOnCLick = () => {
-		logout()
-			.then(() => props.setLoggedUser(null))
-			.catch((error) => console.log(error));
+		localStorage.removeItem("token");
+		props.setLoggedUser(null);
 	};
 
 	const handleInputOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const value = e.target.value;
 		setSearchedUser(value);
 		if (value.length > 0 && value.length % 2 === 0) {
-			searchUsersByName(value)
+			searchUsersByName(value, token)
 				.then((response) => setUsersFound(response.data))
 				.catch((error) => console.log(error));
 		}
