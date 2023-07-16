@@ -20,7 +20,7 @@ Currently the platform supports lists with themes related to movies, series and 
 
 ## **Front End Description** <a name="front-end-description"></a>
 
-The platform has two fully functional back end (API) implementations that are interchangeable. The Ruby on Rails version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend) and the NestJS version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend-2) The current repository contains the React front end implementation.
+The platform has two fully functional back end (API) implementations that are interchangeable. The **Ruby on Rails** version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend) and the **NestJS** version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend-2) The current repository contains the React front end implementation.
 
 The user interface was implemented using the front end library React and the TypeScript programming language. The libraries Material UI and Material Icons were used for styling the interface components and the Vite tool was used to run and build the project.
 
