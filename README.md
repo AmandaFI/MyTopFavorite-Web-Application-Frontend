@@ -20,11 +20,11 @@ Currently the platform supports lists with themes related to movies, series and 
 
 ## **Front End Description** <a name="front-end-description"></a>
 
-The platform implementation is split into two repositories. This repository contains the React front end and [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend.git) contains the API implemented using Ruby on Rails that this project is configured to consume.
+The platform has two fully functional back end (API) implementations that are interchangeable. The Ruby on Rails version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend) and the NestJS version can be found in [this repository](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend-2) The current repository contains the React front end implementation.
 
 The user interface was implemented using the front end library React and the TypeScript programming language. The libraries Material UI and Material Icons were used for styling the interface components and the Vite tool was used to run and build the project.
 
-The axios promise-based HTTP Client was used to consume the [implemented Rails API](https://github.com/AmandaFI/MyTopFavorite-Web-Application-Backend.git). As mentioned in the [overview section](application-overview) the platform interacts with external APIs and currently all data ranked in the lists is fetched from the [Tmdb API](https://developer.themoviedb.org/reference/intro/getting-started) using axios. In the future other external APIs will be added to the platform.
+The axios promise-based HTTP Client was used to consume the both APIs. As mentioned in the [overview section](application-overview) the platform interacts with external APIs and currently all data ranked in the lists is fetched from the [Tmdb API](https://developer.themoviedb.org/reference/intro/getting-started) using axios. In the future other external APIs will be added to the platform.
 
 The pages routing was built using the React Router DOM package and React Tostify package was used to display friendly messages to the user.
 
