@@ -85,7 +85,8 @@ export type putListType = Pick<Partial<completeListType>, "title" | "draft">;
 
 // ------------------- Axios Requests
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://localhost:3000/api/";
+axios.defaults.baseURL = "http://localhost:3000/api/"; // Ruby on Rails
+// axios.defaults.baseURL = "http://localhost:3001/api/"; // NestJS
 // axios.defaults.baseURL = "http://mytopfavorite.com:3000/api/";
 
 // ----- Session
@@ -100,9 +101,9 @@ export const paginationLoadFeed = (pageNumber: number) =>
 	axios.get<Array<completeListTypeBasicUser>>(`/users/followed_users_lists?page=${pageNumber}&per_page=1`);
 export const searchUserById = (id: number) => axios.get<userType>(`/users/${id}`);
 export const searchUsersByName = (name: string) => axios.post<Array<basicUserType>>("/users/find_users", { name });
-export const followUser = (user_id: number) => axios.post<userType>("/users/follow", { user_id });
-export const unfollowUser = (user_id: number) => axios.delete(`/users/unfollow?user_id=${user_id}`);
-export const checkFollowingUser = (user_id: number) => axios.get<userType>(`/users/${user_id}/check_following`);
+export const followUser = (userId: number) => axios.post<basicUserType>("/users/follow", { userId });
+export const unfollowUser = (userId: number) => axios.delete(`/users/unfollow?user_id=${userId}`);
+export const checkFollowingUser = (userId: number) => axios.get<basicUserType>(`/users/${userId}/check_following`);
 
 // ----- List
 export const userLists = (id: number) => axios.get<Array<basicUserType>>(`/lists?id=${id}`);
@@ -112,9 +113,9 @@ export const userPublishedLists = (id: number) =>
 export const userPublishedListsPaginated = (id: number, page: number) =>
 	axios.get<Array<completeListType>>(`/lists/${id}/published_lists?page=${page}&per_page=2`);
 export const deleteList = (listId: number) => axios.delete<Array<simplifiedListType>>(`/lists/${listId}`);
-export const createList = (title: string, category_id: number) =>
-	axios.post<simplifiedListType>("/lists", { title, category_id });
-export const likeList = (id: number) => axios.post<userType>(`/lists/${id}/like`);
+export const createList = (title: string, categoryId: number) =>
+	axios.post<simplifiedListType>("/lists", { title, categoryId });
+export const likeList = (id: number) => axios.post<basicUserType>(`/lists/${id}/like`);
 export const dislikeList = (id: number) => axios.delete(`/lists/${id}/dislike`);
 
 export const getSingleList = (id: number) => axios.get<completeListType>(`/lists/${id}`);

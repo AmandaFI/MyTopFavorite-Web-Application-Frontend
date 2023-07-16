@@ -16,33 +16,35 @@ export const UserContext = createContext<userType | null>(null);
 export const NewListContext = createContext<simplifiedListType | null>(null);
 
 export const App = () => {
-  const [loggedUser, setLoggedUser] = useState<userType | null>(null);
-  const [signUp, setSignUp] = useState(false);
+	const [loggedUser, setLoggedUser] = useState<userType | null>(null);
+	const [signUp, setSignUp] = useState(false);
 
-  React.useEffect(() => {
-    loginStatus().then((response) => setLoggedUser(response.data));
-  }, []);
+	React.useEffect(() => {
+		loginStatus()
+			.then((response) => setLoggedUser(response.data))
+			.catch((_error) => {});
+	}, []);
 
-  if (signUp) return <SignUpForm {...{ setSignUp }} />;
-  else if (loggedUser === null) return <SignInForm {...{ setLoggedUser, setSignUp }} />;
+	if (signUp) return <SignUpForm {...{ setSignUp }} />;
+	else if (loggedUser === null) return <SignInForm {...{ setLoggedUser, setSignUp }} />;
 
-  return (
-    <>
-      <UserContext.Provider value={loggedUser}>
-        <Box>
-          <Navbar {...{ setLoggedUser }} />
-          <Stack direction="row" justifyContent={"space-between"}>
-            <Sidebar />
-            <Routes>
-              <Route path="/" element={<Feed />} />
-              <Route path="/feed" element={<Feed />} />
-              <Route path="/manage-lists" element={<UserPrivateArea />} />
-              <Route path="/edit-list/:id" element={<ListEditingArea />} />
-              <Route path="/user-profile/:id" element={<UserPublicProfile />} />
-            </Routes>
-          </Stack>
-        </Box>
-      </UserContext.Provider>
-    </>
-  );
+	return (
+		<>
+			<UserContext.Provider value={loggedUser}>
+				<Box>
+					<Navbar {...{ setLoggedUser }} />
+					<Stack direction="row" justifyContent={"space-between"}>
+						<Sidebar />
+						<Routes>
+							<Route path="/" element={<Feed />} />
+							<Route path="/feed" element={<Feed />} />
+							<Route path="/manage-lists" element={<UserPrivateArea />} />
+							<Route path="/edit-list/:id" element={<ListEditingArea />} />
+							<Route path="/user-profile/:id" element={<UserPublicProfile />} />
+						</Routes>
+					</Stack>
+				</Box>
+			</UserContext.Provider>
+		</>
+	);
 };

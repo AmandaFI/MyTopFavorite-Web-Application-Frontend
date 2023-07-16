@@ -31,12 +31,13 @@ import {
 	userType,
 	likeList,
 	dislikeList,
+	basicUserType,
 } from "../services/api";
 
 export const UserPublicProfile = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const [searchedUser, setSearchedUser] = useState<userType>();
+	const [searchedUser, setSearchedUser] = useState<basicUserType>();
 	const [searchedUserLists, setSearchedUserLists] = useState<Array<completeListType>>([]);
 	const [following, setFollowing] = useState(false);
 	const [paginationPage, setPaginationPage] = useState(1);
@@ -50,6 +51,7 @@ export const UserPublicProfile = () => {
 					setSearchedUser(response.data);
 					userPublishedListsPaginated(+id!, 1).then((response) => {
 						setSearchedUserLists(response.data as completeListType[]);
+						console.log(response.data);
 						setPaginationPage((previousPage) => previousPage + 1);
 					});
 				})
@@ -144,9 +146,9 @@ export const UserPublicProfile = () => {
 									<Typography component="div" variant="h5" sx={{ color: "white", mt: 5 }}>
 										{searchedUser ? searchedUser.name : ""}
 									</Typography>
-									<Box sx={{ color: "white" }}>
+									{/* <Box sx={{ color: "white" }}>
 										{searchedUser ? `${searchedUser.followedUsersCount} Seguidores` : ""}
-									</Box>
+									</Box> */}
 									<Button
 										size="small"
 										sx={{ color: "white", backgroundColor: theme.palette.primary.main, maxWidth: 150 }}
@@ -165,9 +167,9 @@ export const UserPublicProfile = () => {
 									<Icons>
 										<Box>
 											<Avatar
-												sx={{ mt: 2, ml: 2, bgcolor: stringToColor(list.user.name) }}
-											>{`${list.user.name[0]}${list.user.name[1]}`}</Avatar>
-											<Typography sx={{ ml: 2, mb: 2 }}>{list.user.name}</Typography>
+												sx={{ mt: 2, ml: 2, bgcolor: stringToColor(searchedUser ? searchedUser.name : "default") }}
+											>{`${searchedUser?.name[0]}${searchedUser?.name[1]}`}</Avatar>
+											<Typography sx={{ ml: 2, mb: 2 }}>{searchedUser?.name}</Typography>
 										</Box>
 										<Typography variant="h5" m={2}>
 											{list.title}

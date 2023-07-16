@@ -1,6 +1,13 @@
 import * as React from "react";
 import theme from "../theme";
-import { completeListType, likeList, initialLoadFeed, paginationLoadFeed, dislikeList } from "../services/api";
+import {
+	completeListType,
+	likeList,
+	initialLoadFeed,
+	paginationLoadFeed,
+	dislikeList,
+	completeListTypeBasicUser,
+} from "../services/api";
 import { useEffect, useState } from "react";
 import { posterInitialUrl } from "../services/tmdbApi";
 import { Icons, baseToast, stringToColor } from "../styleHelpers";
@@ -22,14 +29,14 @@ import "react-toastify/dist/ReactToastify.css";
 const SHOWN_ITEMS_PER_LIST: number = 3;
 
 export const Feed = () => {
-	const [feedContent, setFeedContent] = useState<Array<completeListType>>([]);
+	const [feedContent, setFeedContent] = useState<Array<completeListTypeBasicUser>>([]);
 	const [databasePage, setDatabasePage] = useState(1);
 
 	const shuffle = (array: Array<any>) => array.sort((_a, _b) => 0.5 - Math.random());
 
-	const preProcessListsForFeed = (lists: Array<completeListType>) => {
-		const processedLists: Array<completeListType> = lists.reduce(
-			(acc: Array<completeListType>, item) => [...acc, { ...item, shownItems: SHOWN_ITEMS_PER_LIST }],
+	const preProcessListsForFeed = (lists: Array<completeListTypeBasicUser>) => {
+		const processedLists: Array<completeListTypeBasicUser> = lists.reduce(
+			(acc: Array<completeListTypeBasicUser>, item) => [...acc, { ...item, shownItems: SHOWN_ITEMS_PER_LIST }],
 			[]
 		);
 		return shuffle(processedLists);
